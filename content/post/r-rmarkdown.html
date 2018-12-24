@@ -1,15 +1,21 @@
 ---
-title: "Hello R Markdown"
+title: "Hello R Markdown - How to contribute to this site?"
 author: "HumanitaRian useR group"
-date: '2018-12-08'
+date: '2018-11-08'
+tags:
+  - WebData
+  - User-group
 ---
 
 
 
+<p><a href="https://bookdown.org/yihui/blogdown/">Creating Websites with R Markdown</a> is easy and can be done directly R Blogfown package. This is how this site is built.</p>
+<!--MORE-->
+<p>The website is generated from R Markdown documents (R is optional, i.e., you can use plain Markdown documents without R code chunks). This brings a huge amount of benefits, especially if your website is related to data analysis or (R) programming. Being able to use Markdown implies simplicity and more importantly, portability (e.g., you are giving yourself the chance to convert your blog posts to PDF and publish to journals or even books in the future). R Markdown gives you the benefits of dynamic documents — all your results, such as tables, graphics, and inline values, can be computed and rendered dynamically from R code, hence the results you present on your website are more likely to be reproducible.</p>
+<p><img src="/post/r-rmarkdown_files/cover.png" /></p>
 <div id="r-markdown" class="section level1">
 <h1>R Markdown</h1>
-<p>This is an R Markdown document.
-Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
+<p>Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
 <p>You can embed an R code chunk like this:</p>
 <pre class="r"><code>summary(cars)
 ##      speed           dist       
@@ -46,27 +52,42 @@ Figure 1: A fancy pie chart.
 </p>
 </div>
 </div>
-<div id="submit-blog-post-to-the-community" class="section level1">
-<h1>Submit blog post to the community</h1>
+<div id="blog-post-writing" class="section level1">
+<h1>Blog post writing</h1>
 <p>This is a post written in plain Markdown (<code>*.md</code>) instead of R Markdown (<code>*.Rmd</code>). The major differences are:</p>
 <ol style="list-style-type: decimal">
 <li>You cannot run any R code in a plain Markdown document, whereas in an R Markdown document, you can embed R code chunks (<code>```{r}</code>);</li>
-<li>A plain Markdown post is rendered through <a href="https://gohugo.io/overview/configuration/">Blackfriday</a>, and an R Markdown document is compiled by <a href="http://rmarkdown.rstudio.com"><strong>rmarkdown</strong></a> and <a href="http://pandoc.org">Pandoc</a>.</li>
+<li>A plain Markdown post is rendered, and an R Markdown document is compiled by <a href="http://rmarkdown.rstudio.com"><strong>rmarkdown</strong></a> and <a href="http://pandoc.org">Pandoc</a>.</li>
 </ol>
-<p>There are many differences in syntax between Blackfriday’s Markdown and Pandoc’s Markdown. For example, you can write a task list with Blackfriday but not with Pandoc:</p>
-<ul>
-<li>[x] Write an R package.</li>
-<li>[ ] Write a book.</li>
-<li>[ ] …</li>
-<li>[ ] Profit!</li>
-</ul>
-<p>Similarly, Blackfriday does not support LaTeX math and Pandoc does. I have added the MathJax support to this theme (<a href="https://github.com/yihui/hugo-lithium-theme">hugo-lithium-theme</a>) but there is a caveat for plain Markdown posts: you have to include math expressions in a pair of backticks (inline: <code>`$ $`</code>; display style: <code>`$$ $$`</code>), e.g., <code>$S_n = \sum_{i=1}^n X_i$</code>.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> For R Markdown posts, you do not need the backticks, because Pandoc can identify and process math expressions.</p>
-<p>When creating a new post, you have to decide whether the post format is Markdown or R Markdown, and this can be done via the <code>rmd</code> argument of the function <code>blogdown::new_post()</code>, e.g.</p>
 <pre class="r"><code>blogdown::new_post(&quot;Post Title&quot;, rmd = FALSE)</code></pre>
+<p><a href="https://github.com/rstudio/blogdown">Blogdown</a> helps you to create blog posts and other types of web content using the RMarkdown language. Those 8 functions are the key ones:</p>
+<ul>
+<li><strong>build_site()</strong> : Compiles all .Rmd files into Hugo-readable HTML &amp; builds the site</li>
+<li><strong>html_page()</strong> : Renders .Rmd file into Hugo-readable HTML</li>
+<li><strong>hugo_cmd()</strong> : Allows you to run Hugo commands</li>
+<li><strong>install_hugo()</strong> : Downloads the appropriate Hugo files to your computer to allow site generation</li>
+<li><strong>install_theme()</strong> : Downloads the specified theme from GitHub</li>
+<li><strong>new_content()</strong> : Generates a new file in your working directory</li>
+<li><strong>new_site()</strong> : Creates the environment necessary for a new site</li>
+<li><strong>serve_site()</strong> : Allows you to preview a working version of your site</li>
+</ul>
 </div>
-<div class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p>This is because we have to protect the math expressions from being interpreted as Markdown. You may not need the backticks if your math expression does not contain any special Markdown syntax such as underscores or asterisks, but it is always a safer choice to use backticks. When you happen to have a pair of literal dollar signs inside the same element, you can escape one dollar sign, e.g., <code>\$50 and $100</code> renders “$50 and $100”.<a href="#fnref1" class="footnote-back">↩</a></p></li>
-</ol>
+<div id="submiting-to-the-platform" class="section level1">
+<h1>Submiting to the platform</h1>
+<p>You will need to use GitHub
+GitHub is powered by Git, a command-line version-control system. <a href="https://help.github.com/articles/github-glossary/">basic vocab</a> is explained below:</p>
+<ul>
+<li><strong>Repository</strong> : When you make an account on <a href="https://github.com/">Github</a> the first thing you’ll want to do is make a repository (or repo). This is the place to store all of your files for a given project.</li>
+<li><strong>Forking</strong> : Say you really like someone else’s project on GitHub and you’d like to make a copy of it on your account to adjust however you’d like? Well, that process is called forking. To do it, find a repo that you like and click the ’ <i class="fa fa-code-fork" aria-hidden="true"></i> fork ’ button in the right hand corner.</li>
+<li><strong>Branch</strong> : This is a “parallel version” of a repo that you can adjust without impacting the original repo.</li>
+<li><strong>Remote</strong> : The copy of your files that reside on GitHub.com</li>
+<li><strong>Local</strong> : The copy of your files that reside on your computer</li>
+<li><strong>Commit</strong> : A change to a file, usually submitted with a message from you to indicate what was changed</li>
+<li><strong>Push</strong> : Once you commit changes on your local files, you want to send (or push) them to your remote repo, making them available for others.</li>
+<li><strong>Pull</strong> : If multiple people are working in your remote repo, they may have made a change that is not reflected in your local version. You can pull the newest version down to your computer to work on it.</li>
+<li><strong>Subtree</strong> : This is a repo inside of a repo. More on this later.</li>
+</ul>
+<p>Simply fork the main repository - open the [vigie-blogdown.R] script and start creating your Rmd.</p>
+<p><img src="/post/r-rmarkdown_files/new-post.png" /></p>
+<p>An <a href="https://amber.rbind.io/blog/2016/12/19/creatingsite/">indepth tutorial is presented here</a></p>
 </div>

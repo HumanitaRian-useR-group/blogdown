@@ -1,10 +1,13 @@
 ---
 title: How to make the most of our data?
-author: ~
-date: '2017-05-28'
-slug: post-title
-categories: []
-tags: []
+author: Ricardo Bion
+date: '2017-05-16'
+categories:
+  - Data
+tags:
+  - Refugee
+  - WebData
+---
 ---
 
 AirBnB particpated to the recent R user conference in NYC in May 2017.

@@ -30,13 +30,6 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   url = "/tags/"
 
 [[menu.main]]
-  name = "About"
-  pre = "<i class='fa fa-user fa-fw'></i>"
-  weight = 30
-  identifier = "about"
-  url = "/about/"
-
-[[menu.main]]
   name = "Contact"
   pre = "<i class='fa fa-phone fa-fw'></i>"
   weight = 40
@@ -55,11 +48,11 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   iconAndroid = "images/touch-icon-android.png"
   seotitle = "HumanitaRian-useR-group"
   subtitle = "~ Science is show me - not trust me ~"
-  description = "Hugo is one of the most popular open-source static site generators. With its amazing speed and flexibility, Hugo makes building websites fun again."
+  description = "The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected."
   paginate = 10
 
   # Choose your social networks
-  email = "HumanitaRian-useR-group"
+  email = "humanitarian.user@gmail.com"
   github = "HumanitaRian-useR-group"
   twitter = "HumanitaRianus1"
 #  linkedin = "linkedin_username"

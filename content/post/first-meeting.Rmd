@@ -1,0 +1,168 @@
+---
+title: "Support the Grand Bargain commitment on Impartial & Joint Needs Assessment"
+author: "HumanitaRian useR group"
+date: '2018-11-20'
+tags:
+  - WebData
+  - User-group
+---
+
+This report is the output of a 2 days workshop held in Amman -5-6 Nov 2018. The presentation & group work output that fed the discussions are accessible here. Participation was diverse and included analysts from all organisations below:
+
+
+
+#  Problem statement: Science is “show me”, not “trust me”!
+
+While the data collection phase has been for years the main challenge, we have now a deluge of data that we do not always make the most of. 
+
+* Interagency collaboration and relations with donors within the [grand bargain](https://interagencystandingcommittee.org/improve-joint-and-impartial-needs-assessments) can be compromised when the analysis process is not transparent and reproducible. 
+
+* Mistakes and errors in an analysis workflow are difficult to identify when peer review is made complicated by a “language/license barrier”.
+
+* Numerous advanced data analysis techniques are currently not applied on humanitarian datasets
+
+* Lack of transparency, standards and triangulation in processing steps results in poor quality data and limited data sharing.
+
+![](/post/first-meeting_files/showme.jpg)
+
+#  Vision Statement for the humanitaRian-useR group
+
+The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected.
+
+R, both as a [language](https://www.r-project.org/about.html) and through the [tools/packages](https://cran.r-project.org/web/views/) that are built on it, is our community preferred choice as it enables:
+
+* bridging existing gaps with best practices from the data science industry and academics;
+
+* minimizing dependencies on a specific vendor, license or organization;
+
+* building and expanding common knowledge across multiple organisations.
+
+
+
+<blockquote> 
+“No matter how complex and polished the individual operations are, it is often the quality of the glue that most directly determines the power of the system.”
+— [Hal Abelson](https://tidyverse.tidyverse.org/articles/manifesto.html)
+</blockquote>
+
+
+#  Challenges: A diversity of situations
+A cultural shift is required: Beyond the official commitment, there is still little incentive within the humanitarian communities to commit to reproducibility, transparency and consequent data sharing. Some reasons include: 
+
+1) political - organizational cultures of resistance and risk aversion to data sharing 
+2) technical - reliance on outdated, limited  and proprietary  technologies 
+3) capacity - many humanitarian information managers lack contemporary knowledge of modern data science tools
+Our goal is to address the different technical and capacity needs of different humanitarian projects and users leveraging to the full the skills and existent capacity across the community:
+
+* Automation scripts for data management / munging;
+* Multiple packages to implement a workflow (for instance survey data analysis);
+* Packages with user interface for specific tasks (for instance data anonymization).
+
+
+| Potential Approaches | Opportunities   |  Challenges | 
+|---|---|---|
+| Agree on **Standard Package Universe** used to facilitate automation via scripts  |  Minimal agreement / Minimises risk associated with packages dependencies | Requires good expertise among all users  |
+| Set up **Standard Analysis Workflow** - includes conventions for project organisation and notation, standard reports and data platform | Allows sharing of analysis and full analytical approach   |  Requires good expertise among all users / Does not provide knowledge management capacity (i.e. records of best practices) – if implemented without understanding of process, bad practices could be replicated  |
+| Develop one or more **Common Package**(s) - promotes best practices and includes graphical user interface - one attempt is [koboloadeR](https://unhcr.github.io/koboloadeR/docs/)  | Facilitates the dissemination of best practices / Allows to expand the # of users   |  Requires coordination and joint efforts |
+
+
+**Change to be initiated from the bottom and gradually implemented, with the aim for support from the top**. Some organizations have already established workflows and expertise that rely on other tools and languages (both proprietary and open source) which are currently meeting their needs, some organisations are dependent on partner requests and/or previous investments.   However, they can still draw from the open code to improve their tools and transition slowly as opportunities arise.  Other organisations start from a tabula rasa and can build their approach directly on R. 
+
+#  Opportunities: Start small, bottom-up and now!
+
+
+* Users to profile themselves: R Language Learning curve is steep, but some users may only require a  user interface for dedicated R packages (like KoboladeR) or the need to understand the code sufficiently to manipulate scripts written by others e.g. changing parameters. 
+
+* Bottom-up approach to establish good practices on reproducibility: prove and learn by doing at field level – this does not need to be limited to R only since making scripts and data available is a principle that applies regardless of tool although it is easier when there is a common language. 
+
+* Focus on change and building capacity: add R for recruitment desired skills requirement or consultancy deliverables and provide training for staff
+The initial investment needed is not much to get started (tutorial contribution from staff, community events, training...) and the potential returns in terms of improved data efficiency and value for money are great. 
+
+#  Translating analysis commitments into technical requirements
+
+R facilitates more [easily reproducible](https://cran.r-project.org/web/views/ReproducibleResearch.html) and transparent data manipulation and analysis. Some of the packages enable complex processes where advanced statistical capacity is required but, nonetheless, correct documentation and transparency will help improve quality and the use of appropriate techniques and methods:
+
+* Sampling and Weighting: Generate different type of sample from a Universe (registration database) – specifically stratified sample; Post-stratify a dataset to account for low response rate; Weight data before analyzing.
+
+* Data cleaning, Anonymization & Documentation: Apply cleaning log (duplicate household…); Reshape data, specifically rebuild indicators from individual level to household level; Clean multiple choice questions  (low frequency modalities, review “or_other”..); Treat numeric outliers; Input missing data; Estimate statistical disclosure risk measurement.
+
+* Tabulation, Crosstabulation & Correlations: Systematically review results for each question in the survey, key cross tabulations; Identify correlations (Chi-square, ANOVA, etc.).
+
+* Multivariate analysis & Spatial analysis: Combine multiple variables in order to identify variables through Clustering, Multiple Correspondence analysis, Latent Class variables; Discover spatial  regression (i-moran) & Identify Spatial patterns...
+
+* Prediction & Modeling: Confirm Analysis Hypothesis or Enrich Registration data
+
+* Indicator composition: Compile together multiple indicators in order to measure complex concepts such as severity or vulnerability
+
+* Natural Language Processing for the analysis of qualitative data (text) from Focus Group discussions for instance
+
+#  Building a community
+Organise online collaboration to share knowledge
+
+1. An [open Skype group](https://join.skype.com/qYBKC5q3wKp4 ) to share ideas and request support 
+
+2. Use a [dedicated twitter hashtag](https://twitter.com/search?f=tweets&vertical=default&q=%23humanitaRian_useR&src=typd)  #humanitaRian_useR in conjunction with #Rstats 
+
+3. Community Registry:  - includes list of persons that committed to build a tutorial - list to be revised every year in November -
+
+4. This Blog Platform to host tutorials, articles & announcements (R-blogger style) in relation with humanitarian activities - Identify the cases where R has an added value above using existing tools:  Example of potential topics: 
+
+
+
+# Train & certify users on an interagency Humanitarian Data Science curriculum
+
+Create a dedicated training path on DataCamp with modules:
+
+* Installing R and RStudio
+
+* RStudio interface: scripts, console, ...
+
+* Tidyverse for data munging
+
+* Mapping
+
+* Dashboard with R
+
+* Composite Indicators
+* Survey data analysis
+
+This training depends on simplicity and relevance - meaning we need good problems and data sets for the instruction and exercises.
+
+# Organise Community Events
+
+One or a combination of:
+
+* Online Webinars - every 3 months - 
+
+* New workshop – share experience, adjust the vision
+
+* Project meeting – for package
+
+* Conference – showcasing analysis within the community - See the example of Conference on the use of R in National Statistical Office
+
+* Training Events; Sharing tool through a package: Specific Training workshop
+
+* One week sprint to build Data for Humanitarians MOOC (potentially at the OCHA Centre for Humanitarian Data for free content published on datacamp) 
+Hackathons (we have the data!) - see Summer of code
+
+#  Engage on partnership
+
+Partners & academic
+ 
+* DataCamp - to distribute free modules & for additional paid registration -  review the content of the course and help us with production 
+* Data Carpentry - can help build training content 
+* Statistics without Borders -  can help build training content  
+* DataKind -  can help build training content   
+* Rstudio - can help reviewing content of the course 
+* The European Joint Research Center on Composite Indicator is working on a dedicated package for Composite Indicators
+* Joint Interagency Analysis Group (JIAG)
+
+#  Calling for Funding
+
+* Dedicated person to keep the community live, ensure content is created and reviewed
+* DataCamp subscriptions
+* Fund Guest speaker to participate to the next event (workshop/conference )
+* Fund next conference (need to register on the R consortium user group support program:)
+* Fund Travel to conferences or venues (such as UseR 2018) to attract collaborators and disseminate work 
+* Fund Code review services for specific packages to audit/improve the quality of the package (like KoboloadeR)
+* Fund participation form experts / developers on code sprint events
+

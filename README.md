@@ -16,7 +16,7 @@ Link Remote repo with Local repo
 Now use copied URL to link your local repo with remote GitHub repo. When you clone a repository with git clone, it automatically creates a remote connection called origin pointing back to the cloned repository. The command remote is used to manage set of tracked repositories.
 
     
-    git remote add origin https://github.com/data-vigie/humanitarian-user-group.io.git
+    git remote add origin https://github.com/HumanitaRian-useR-group/HumanitaRian-useR-group.github.io.git
 
 Synchronize
 
