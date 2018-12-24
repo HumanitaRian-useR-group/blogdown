@@ -1,0 +1,134 @@
+---
+title: 'Accessing data from REST API using R: examples for KoBoToolbox and Country
+  Based Pooled Fund (CBPF) data'
+author: Punya Prasad Sapkota
+date: '2018-12-08'
+categories:
+  - Data
+tags:
+  - KoBoToolbox
+  - WebData
+---
+
+R program has become a language of choice for data science work. It has rich feature library that can be readily used for variety of data management tasks. This article focuses on accessing data from the [KoBoToolbox](https://kobo.humanitarianresponse.info/).
+
+# KoBoToolbox
+[KoBoToolbox](http://support.kobotoolbox.org/getting-started/welcome/welcome-to-kobotoolbox) provides a suite of tools for field data collection in the challenging environments. It is free and open source and works both on and offline.
+
+KoBoToolbox has a number of advanced features which are very useful for advanced use case scenario. KoBoToolbox has made data accessible through the implementation of [REST API](https://kc.humanitarianresponse.info/api/v1/data). This provides enormous possibility of automating the workflow of survey data collection, processing and analysis. Even if accessibility of the data has not been set as public, data can be fetched by passing username and password of the KoBo account. KoBoToolbox has two APIs access points namely kpi and kc. The toolbox started supporting form deployments and access to data using 'kc' API. In the latest version, 'kpi' has been implemented as the primary [API](http://support.kobotoolbox.org/managing-your-project-s-data/rest-services).  
+
+This article is written to demostrates the methods to access data from KoBo using R program.
+
+## Main packages used:
+```{r}
+library(httr)
+library(jsonlite)
+#for reading and writing data
+library(readr) # to read CSV data
+library(openxlsx) # to write to excel file
+
+```
+Package 'httr' has very useful tools for working with HTTP requests such as GET, POST, PATCH etc. In addition, we can pass parameters such as authentication information etc. The 'jsonlite' package offers flexible, robust, high performance tools for working with JSON data.
+
+
+First of all, let's set the KoBo server URL.
+
+## KoBoToolbox Example
+```{r}
+####----set global variables ----------
+kobo_server_url<-"https://kobo.humanitarianresponse.info/"
+kc_server_url<-"https://kc.humanitarianresponse.info/"
+```
+
+To download data, unique identifier of the form is required to construct the url to fetch data. In the older API version 1, forms/projects deployed to collect data has unique six digit identifier (for example, 145448). With the ID of the form, KoBo data download URL can be constructed as:
+
+```{r}
+form_id<-253043 #change the id to your form's id
+url<-paste0(kc_server_url,"api/v1/data/",form_id,".csv")
+#returns the CSV content of the form
+```
+Above url points to the CSV content of the form data that can be easily transformed to R dataframe for further processing.
+
+To download the data, GET request is made. If data is not available publicly, username and password of the KoBo account need to be passed as authentication parameter.
+```{r}
+#supply url for the data
+rawdata<-GET(url)
+#if form data is not accessible publicly, then username and password needs to be provided. 
+#Use the following code to download the data.
+#u<-"username"
+#pw<-"password"
+#rawdata<-GET(url,authenticate(u,pw),progress())
+```
+
+The server responds with a status code which needs to be checked for its successful return of the requested information before further processing of the information.
+```{r}
+print(paste0("Status Code: ",rawdata$status_code))
+```
+
+When an API call responds to a request, the data is returned as a list. The list has many different items and the most of the items are administrative information from the API. It is suggested to explore the list elements to understand the information so that required piece of data can be extracted correctly.
+
+```{r}
+# to check the elements returned:
+str(rawdata)
+```
+
+The main raw data of interest is returned with 'content' tag. In addition, when content has non-English characters, for example Arabic texts, we can encode the output as 'UTF-8' to ensure that the information is retained in its original form and encoding.
+
+```{r}
+d_content <- content(rawdata,"raw",encoding="UTF-8")
+```
+
+The raw content can be parsed to CSV format by using read_csv() function from 'readr' package.
+```{r}
+d_content_csv <- read_csv(d_content)
+```
+
+Let's change it to the R data frame object.
+
+```{r}
+d_content_csv <- as.data.frame(d_content_csv)
+```
+
+To save it to the external CSV or even excel file, we can use any csv or xlsx writer functions available in R packages. 
+```{r}
+#using openxlsx package to save data
+openxlsx::write.xlsx(d_content_csv,"kobo_data.xlsx",sheetName="data", row.names = FALSE)
+```
+
+Let's look at another example where data is in the JSON format. When downloading data, it is a common practice to check the number of submissions. The data download request is made only if the form has one or more records.
+```{r}
+#submission count
+d_count_subm<-0 #initialise
+#returns number of data submisstion in each form
+stat_url<- paste0(kc_server_url,"api/v1/stats/submissions/",form_id,"?group=anygroupname")
+rawdata_stat<-GET(stat_url)
+#supply user name and password if data is not publicly available
+#rawdata_stat<-GET(stat_url,authenticate(u,pw),progress())
+d_content_stat <- rawToChar(rawdata_stat$content)
+d_content_stat <- fromJSON(d_content_stat)
+d_count_submission <- d_content_stat$count
+  #check whether there is record or not
+if (is.null(d_count_submission)){
+    d_count_submission <-0
+}
+```
+
+# Country Based Pooled Fund API
+Another example to download Country Based Pooled Fund [CBPF data](https://cbpfapi.unocha.org/vo1) using API. The CBPF has made several dataset available to access using the REST API. 
+
+```{r}
+url<-"https://cbpfapi.unocha.org/vo1/odata/Location?poolfundAbbrv=TUR70&$format=csv"
+#returns the CSV content of the form
+rawdata<-GET(url)
+d_content <- content(rawdata,"raw",encoding="UTF-8")
+d_content_csv <- as.data.frame(read_csv(d_content))
+View(d_content_csv)
+```
+
+
+Above examples provides the list of functions and process to fetch information using REST API. A list of functions has been developed in the [KoBo APItoolbox](https://github.com/ppsapkota/kobohr_apitoolbox). This GitHub repo includes additional functions and utility to work with the KoBo dataset. This also includes utilities for [new KoBo API](https://kobo.humanitarianresponse.info/assets/).
+
+
+
+
+

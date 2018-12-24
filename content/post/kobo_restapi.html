@@ -1,0 +1,193 @@
+---
+title: 'Accessing data from REST API using R: examples for KoBoToolbox and Country
+  Based Pooled Fund (CBPF) data'
+author: Punya Prasad Sapkota
+date: '2018-12-08'
+categories:
+  - Data
+tags:
+  - KoBoToolbox
+  - WebData
+---
+
+
+
+<p>R program has become a language of choice for data science work. It has rich feature library that can be readily used for variety of data management tasks. This article focuses on accessing data from the <a href="https://kobo.humanitarianresponse.info/">KoBoToolbox</a>.</p>
+<div id="kobotoolbox" class="section level1">
+<h1>KoBoToolbox</h1>
+<p><a href="http://support.kobotoolbox.org/getting-started/welcome/welcome-to-kobotoolbox">KoBoToolbox</a> provides a suite of tools for field data collection in the challenging environments. It is free and open source and works both on and offline.</p>
+<p>KoBoToolbox has a number of advanced features which are very useful for advanced use case scenario. KoBoToolbox has made data accessible through the implementation of <a href="https://kc.humanitarianresponse.info/api/v1/data">REST API</a>. This provides enormous possibility of automating the workflow of survey data collection, processing and analysis. Even if accessibility of the data has not been set as public, data can be fetched by passing username and password of the KoBo account. KoBoToolbox has two APIs access points namely kpi and kc. The toolbox started supporting form deployments and access to data using ‘kc’ API. In the latest version, ‘kpi’ has been implemented as the primary <a href="http://support.kobotoolbox.org/managing-your-project-s-data/rest-services">API</a>.</p>
+<p>This article is written to demostrates the methods to access data from KoBo using R program.</p>
+<div id="main-packages-used" class="section level2">
+<h2>Main packages used:</h2>
+<pre class="r"><code>library(httr)
+library(jsonlite)
+#for reading and writing data
+library(readr) # to read CSV data
+library(openxlsx) # to write to excel file</code></pre>
+<p>Package ‘httr’ has very useful tools for working with HTTP requests such as GET, POST, PATCH etc. In addition, we can pass parameters such as authentication information etc. The ‘jsonlite’ package offers flexible, robust, high performance tools for working with JSON data.</p>
+<p>First of all, let’s set the KoBo server URL.</p>
+</div>
+<div id="kobotoolbox-example" class="section level2">
+<h2>KoBoToolbox Example</h2>
+<pre class="r"><code>####----set global variables ----------
+kobo_server_url&lt;-&quot;https://kobo.humanitarianresponse.info/&quot;
+kc_server_url&lt;-&quot;https://kc.humanitarianresponse.info/&quot;</code></pre>
+<p>To download data, unique identifier of the form is required to construct the url to fetch data. In the older API version 1, forms/projects deployed to collect data has unique six digit identifier (for example, 145448). With the ID of the form, KoBo data download URL can be constructed as:</p>
+<pre class="r"><code>form_id&lt;-253043 #change the id to your form&#39;s id
+url&lt;-paste0(kc_server_url,&quot;api/v1/data/&quot;,form_id,&quot;.csv&quot;)
+#returns the CSV content of the form</code></pre>
+<p>Above url points to the CSV content of the form data that can be easily transformed to R dataframe for further processing.</p>
+<p>To download the data, GET request is made. If data is not available publicly, username and password of the KoBo account need to be passed as authentication parameter.</p>
+<pre class="r"><code>#supply url for the data
+rawdata&lt;-GET(url)
+#if form data is not accessible publicly, then username and password needs to be provided. 
+#Use the following code to download the data.
+#u&lt;-&quot;username&quot;
+#pw&lt;-&quot;password&quot;
+#rawdata&lt;-GET(url,authenticate(u,pw),progress())</code></pre>
+<p>The server responds with a status code which needs to be checked for its successful return of the requested information before further processing of the information.</p>
+<pre class="r"><code>print(paste0(&quot;Status Code: &quot;,rawdata$status_code))</code></pre>
+<pre><code>## [1] &quot;Status Code: 200&quot;</code></pre>
+<p>When an API call responds to a request, the data is returned as a list. The list has many different items and the most of the items are administrative information from the API. It is suggested to explore the list elements to understand the information so that required piece of data can be extracted correctly.</p>
+<pre class="r"><code># to check the elements returned:
+str(rawdata)</code></pre>
+<pre><code>## List of 10
+##  $ url        : chr &quot;https://kc.humanitarianresponse.info/api/v1/data/253043.csv&quot;
+##  $ status_code: int 200
+##  $ headers    :List of 8
+##   ..$ date               : chr &quot;Mon, 24 Dec 2018 11:48:28 GMT&quot;
+##   ..$ content-type       : chr &quot;application/csv&quot;
+##   ..$ content-length     : chr &quot;68467&quot;
+##   ..$ server             : chr &quot;nginx/1.10.3 (Ubuntu)&quot;
+##   ..$ content-disposition: chr &quot;attachment; filename=aUBanmH6zXuLaDfUyoSbZB_2018_12_24.csv&quot;
+##   ..$ content-language   : chr &quot;en&quot;
+##   ..$ vary               : chr &quot;Accept, Accept-Language, Cookie&quot;
+##   ..$ allow              : chr &quot;GET, POST, PATCH, HEAD, OPTIONS&quot;
+##   ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;insensitive&quot; &quot;list&quot;
+##  $ all_headers:List of 1
+##   ..$ :List of 3
+##   .. ..$ status : int 200
+##   .. ..$ version: chr &quot;HTTP/2&quot;
+##   .. ..$ headers:List of 8
+##   .. .. ..$ date               : chr &quot;Mon, 24 Dec 2018 11:48:28 GMT&quot;
+##   .. .. ..$ content-type       : chr &quot;application/csv&quot;
+##   .. .. ..$ content-length     : chr &quot;68467&quot;
+##   .. .. ..$ server             : chr &quot;nginx/1.10.3 (Ubuntu)&quot;
+##   .. .. ..$ content-disposition: chr &quot;attachment; filename=aUBanmH6zXuLaDfUyoSbZB_2018_12_24.csv&quot;
+##   .. .. ..$ content-language   : chr &quot;en&quot;
+##   .. .. ..$ vary               : chr &quot;Accept, Accept-Language, Cookie&quot;
+##   .. .. ..$ allow              : chr &quot;GET, POST, PATCH, HEAD, OPTIONS&quot;
+##   .. .. ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;insensitive&quot; &quot;list&quot;
+##  $ cookies    :&#39;data.frame&#39;: 0 obs. of  7 variables:
+##   ..$ domain    : logi(0) 
+##   ..$ flag      : logi(0) 
+##   ..$ path      : logi(0) 
+##   ..$ secure    : logi(0) 
+##   ..$ expiration:Classes &#39;POSIXct&#39;, &#39;POSIXt&#39;  num(0) 
+##   ..$ name      : logi(0) 
+##   ..$ value     : logi(0) 
+##  $ content    : raw [1:68467] 51 5f 45 2f ...
+##  $ date       : POSIXct[1:1], format: &quot;2018-12-24 11:48:28&quot;
+##  $ times      : Named num [1:6] 0 0.0295 0.0564 0.1276 0.3802 ...
+##   ..- attr(*, &quot;names&quot;)= chr [1:6] &quot;redirect&quot; &quot;namelookup&quot; &quot;connect&quot; &quot;pretransfer&quot; ...
+##  $ request    :List of 7
+##   ..$ method    : chr &quot;GET&quot;
+##   ..$ url       : chr &quot;https://kc.humanitarianresponse.info/api/v1/data/253043.csv&quot;
+##   ..$ headers   : Named chr &quot;application/json, text/xml, application/xml, */*&quot;
+##   .. ..- attr(*, &quot;names&quot;)= chr &quot;Accept&quot;
+##   ..$ fields    : NULL
+##   ..$ options   :List of 2
+##   .. ..$ useragent: chr &quot;libcurl/7.58.0 r-curl/3.2 httr/1.4.0&quot;
+##   .. ..$ httpget  : logi TRUE
+##   ..$ auth_token: NULL
+##   ..$ output    : list()
+##   .. ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;write_memory&quot; &quot;write_function&quot;
+##   ..- attr(*, &quot;class&quot;)= chr &quot;request&quot;
+##  $ handle     :Class &#39;curl_handle&#39; &lt;externalptr&gt; 
+##  - attr(*, &quot;class&quot;)= chr &quot;response&quot;</code></pre>
+<p>The main raw data of interest is returned with ‘content’ tag. In addition, when content has non-English characters, for example Arabic texts, we can encode the output as ‘UTF-8’ to ensure that the information is retained in its original form and encoding.</p>
+<pre class="r"><code>d_content &lt;- content(rawdata,&quot;raw&quot;,encoding=&quot;UTF-8&quot;)</code></pre>
+<p>The raw content can be parsed to CSV format by using read_csv() function from ‘readr’ package.</p>
+<pre class="r"><code>d_content_csv &lt;- read_csv(d_content)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_character(),
+##   `Q_E/Q_E1` = col_double(),
+##   `Q_E/Q_E2` = col_date(format = &quot;&quot;),
+##   `Q_E/Q_E3` = col_double(),
+##   `Q_E/Q_E5` = col_double(),
+##   `Q_E/Q_E6` = col_double(),
+##   `gchoose_th/inter_sect` = col_logical(),
+##   `gchoose_th/cccm` = col_logical(),
+##   `gchoose_th/education` = col_logical(),
+##   `gchoose_th/nfi_shelte` = col_logical(),
+##   `gchoose_th/food_secur` = col_logical(),
+##   `gchoose_th/health_sec` = col_logical(),
+##   `gchoose_th/early_reco` = col_logical(),
+##   `gchoose_th/protection` = col_logical(),
+##   `I_S_Q/Q_K1/Q_K1_B` = col_double(),
+##   `I_S_Q/Q_K1/Q_K1_E` = col_date(format = &quot;&quot;),
+##   `I_S_Q/aap_group/Q1_1_4/food` = col_logical(),
+##   `I_S_Q/aap_group/Q1_1_4/nfi` = col_logical(),
+##   `I_S_Q/aap_group/Q1_1_4/shelter` = col_logical(),
+##   `I_S_Q/aap_group/Q1_1_4/wash` = col_logical(),
+##   `I_S_Q/aap_group/Q1_1_4/nutrition` = col_logical()
+##   # ... with 472 more columns
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
+<p>Let’s change it to the R data frame object.</p>
+<pre class="r"><code>d_content_csv &lt;- as.data.frame(d_content_csv)</code></pre>
+<p>To save it to the external CSV or even excel file, we can use any csv or xlsx writer functions available in R packages.</p>
+<pre class="r"><code>#using openxlsx package to save data
+openxlsx::write.xlsx(d_content_csv,&quot;kobo_data.xlsx&quot;,sheetName=&quot;data&quot;, row.names = FALSE)</code></pre>
+<p>Let’s look at another example where data is in the JSON format. When downloading data, it is a common practice to check the number of submissions. The data download request is made only if the form has one or more records.</p>
+<pre class="r"><code>#submission count
+d_count_subm&lt;-0 #initialise
+#returns number of data submisstion in each form
+stat_url&lt;- paste0(kc_server_url,&quot;api/v1/stats/submissions/&quot;,form_id,&quot;?group=anygroupname&quot;)
+rawdata_stat&lt;-GET(stat_url)
+#supply user name and password if data is not publicly available
+#rawdata_stat&lt;-GET(stat_url,authenticate(u,pw),progress())
+d_content_stat &lt;- rawToChar(rawdata_stat$content)
+d_content_stat &lt;- fromJSON(d_content_stat)
+d_count_submission &lt;- d_content_stat$count
+  #check whether there is record or not
+if (is.null(d_count_submission)){
+    d_count_submission &lt;-0
+}</code></pre>
+</div>
+</div>
+<div id="country-based-pooled-fund-api" class="section level1">
+<h1>Country Based Pooled Fund API</h1>
+<p>Another example to download Country Based Pooled Fund <a href="https://cbpfapi.unocha.org/vo1">CBPF data</a> using API. The CBPF has made several dataset available to access using the REST API.</p>
+<pre class="r"><code>url&lt;-&quot;https://cbpfapi.unocha.org/vo1/odata/Location?poolfundAbbrv=TUR70&amp;$format=csv&quot;
+#returns the CSV content of the form
+rawdata&lt;-GET(url)
+d_content &lt;- content(rawdata,&quot;raw&quot;,encoding=&quot;UTF-8&quot;)
+d_content_csv &lt;- as.data.frame(read_csv(d_content))</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   PooledFundName = col_character(),
+##   PooledFundId = col_double(),
+##   AllocationTypeId = col_double(),
+##   AllocationYear = col_double(),
+##   AllocationSourceName = col_character(),
+##   ChfId = col_double(),
+##   ChfProjectCode = col_character(),
+##   Location = col_character(),
+##   ActivityName = col_character(),
+##   Men = col_double(),
+##   Women = col_double(),
+##   Boys = col_double(),
+##   Girls = col_double(),
+##   Percentage = col_double(),
+##   LocationAdminLevelLatitude = col_double(),
+##   LocationAdminLevelLongitude = col_double(),
+##   AdminLocation1TypeName = col_character(),
+##   AdminLocation1 = col_character(),
+##   AdminLevel1PCode = col_character()
+## )</code></pre>
+<pre class="r"><code>View(d_content_csv)</code></pre>
+<p>Above examples provides the list of functions and process to fetch information using REST API. A list of functions has been developed in the <a href="https://github.com/ppsapkota/kobohr_apitoolbox">KoBo APItoolbox</a>. This GitHub repo includes additional functions and utility to work with the KoBo dataset. This also includes utilities for <a href="https://kobo.humanitarianresponse.info/assets/">new KoBo API</a>.</p>
+</div>
