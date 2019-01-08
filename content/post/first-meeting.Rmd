@@ -7,8 +7,8 @@ tags:
   - User-group
 ---
 
-This report is the output of a 2 days workshop held in Amman -5-6 Nov 2018. The presentation & group work output that fed the discussions are accessible here. Participation was diverse and included analysts from all organisations below:
-
+This report is the output of a 2 days workshop held in Amman -5-6 Nov 2018. The presentation & group work output that fed the discussions are [accessible here](https://www.dropbox.com/sh/4si1j10qi88hbft/AABP6dfIxBSHu30mV4pnEYYMa?dl=0). Participation was diverse and included analysts from all organisations below:
+![](/post/first-meeting_files/logoworkshop.png)
 
 
 #  Problem statement: Science is “show me”, not “trust me”!

@@ -30,7 +30,7 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   url = "/tags/"
 
 [[menu.main]]
-  name = "Contact"
+  name = "Skype-group"
   pre = "<i class='fa fa-phone fa-fw'></i>"
   weight = 40
   url = "https://join.skype.com/qYBKC5q3wKp4"
