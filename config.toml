@@ -39,7 +39,7 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
 [params]
   author = "HumanitaRian-useR-group"
   bg = "images/grey-prism.svg"
-  avatar = "images/avatar.jpg"
+  avatar = "images/avatar.png"
   favicon = "images/favicon.ico"
   favicon16 = "images/favicon-16x16.png"
   favicon32 = "images/favicon-32x32.png"
@@ -55,7 +55,7 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   email = "humanitarian.user@gmail.com"
   github = "HumanitaRian-useR-group"
   twitter = "HumanitaRianus1"
-#  linkedin = "linkedin_username"
+  linkedin = "https://www.linkedin.com/groups/8732707/"
 #  weibo = "weibo_username"
  # wechat= "images/qrcode.jpg"  # Replace with your wechat qrcode image
   # facebook = "facebook_username"
