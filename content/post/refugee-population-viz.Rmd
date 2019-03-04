@@ -123,9 +123,14 @@ theme_map <- function(...) {
 
 ```{r data, include=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 
+# Time series
+url <- paste( 'http://popstats.unhcr.org/en/time_series.csv') 
+download.file(url, destfile = "unhcr_popstats_export_time_series_all_data.csv" )
+
 # http://popstats.unhcr.org/en/time_series.csv
 data <- read.csv("unhcr_popstats_export_time_series_all_data.csv", 
-                 comment.char = "#",skip = 3, header = TRUE, as.is = TRUE, fileEncoding = "UTF8")
+                 skip = 3 #,comment.char = "#", header = TRUE, as.is = TRUE, fileEncoding = "UTF8"
+                 )
 
 names(data)[2] <- "Asylum"
 data$Value <- as.numeric(data$Value)
@@ -137,7 +142,9 @@ names(ctry)[1] <- "ctry"
 names(ctry2)[1] <- "ctry"
 
 ctryall <- unique(rbind(ctry, ctry2))
-rm(ctry, ctry2)
+
+#levels(ctryall$ctry)
+#rm(ctry, ctry2)
 ctryall$ctry2 <- ctryall$ctry
 #crtyall <- order(crtyall)
 
@@ -151,7 +158,12 @@ ctryall$ctry[ctryall$ctry == "Central African Rep."] <- "Central African Republi
 ctryall$ctry[ctryall$ctry == "China, Hong Kong SAR"] <- "Hong Kong" 
 ctryall$ctry[ctryall$ctry == "China, Macao SAR"] <- "Macao" 
 ctryall$ctry[ctryall$ctry == "Côte d'Ivoire"] <- "Cote d'Ivoire" 
+# C<f4>te d'Ivoire
+ctryall$ctry[ctryall$ctry == "C\xf4te d'Ivoire"] <- "Cote d'Ivoire" 
+# Cura<e7>ao
 ctryall$ctry[ctryall$ctry == "Curaçao"] <- "Curacao" 
+ctryall$ctry[ctryall$ctry == "Cura\xe7ao"] <- "Curacao" 
+
 ctryall$ctry[ctryall$ctry == "Czech Rep."] <- "Czech Republic" 
 ctryall$ctry[ctryall$ctry == "Dem. Rep. of the Congo"] <- "Congo, The Democratic Republic of the" 
 ctryall$ctry[ctryall$ctry == "Dominican Rep."] <- "Dominican Republic" 
@@ -192,6 +204,10 @@ data$Asylum[data$Asylum == "Syrian Arab Republic"] <- "Syria"
 
 ## http://opengeocode.org/download
 ## in order to get "latitude" & "longitude" for the centroid of the country
+url <- paste( 'https://web.archive.org/web/20150319012353/http://opengeocode.org/cude/download.php?file=/home/fashions/public_html/opengeocode.org/download/cow.txt') 
+download.file(url, destfile = "cow.txt" )
+
+
 cow <- read.csv("cow.txt",skip = 28, encoding = "UTF-8", sep = ";", comment.char = "#")
 
 # returns string w/o leading whitespace
@@ -209,7 +225,7 @@ cow <- merge(x = cow , y = mena , by = "ISO3166A3", all.x = TRUE )
 #rm(mena)
 #str(ctryall)
 ctryall <- merge(x = ctryall , y = cow , by.x = "ctry", by.y = "ISOen_name" , all.x = TRUE )
-rm(cow)
+#rm(cow)
 ## Eliminate record without 
 ctryall <- ctryall[!rowSums(is.na(ctryall["latitude"])), ]
 ctryall <- ctryall[!rowSums(is.na(ctryall["longitude"])), ]
@@ -239,7 +255,7 @@ data <- data[ !(data$Origin %in% c("","Various/Unknown","Stateless","Tibetan") )
 # add latlons
 data <- merge(data, ctryall, by.x , by.x = "Origin", by.y = "ctry2" , all.x = TRUE )
 data <- merge(data, ctryall, by.x , by.x = "Asylum", by.y = "ctry2" , all.x = TRUE )
-rm(ctryall)
+#rm(ctryall)
 
 ## Build uniqueID for Arc
 data$arc <- paste("from-",data$Origin,"-to-", data$Asylum, sep = "")
@@ -249,7 +265,10 @@ arc <- unique(data[ c("arc", "longitude.x", "latitude.x", "longitude.y", "latitu
 #### Create curved routes##############################
 # calculate routes -- Dateline Break FALSE, otherwise we get a bump in the shifted ggplots
 gcircles <- gcIntermediate(arc[,c('longitude.x', 'latitude.x')], arc[,c('longitude.y', 'latitude.y')], 
-                      n = 80, breakAtDateLine = FALSE, addStartEnd = TRUE, sp  = TRUE)
+                      n = 80, 
+                      breakAtDateLine = FALSE, 
+                      addStartEnd = TRUE, 
+                      sp  = TRUE)
 
 # http://docs.ggplot2.org/0.9.3.1/fortify.map.html
 gcircles  <- ldply(gcircles@lines, fortify)
