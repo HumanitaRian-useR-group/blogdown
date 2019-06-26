@@ -1,0 +1,200 @@
+---
+title: "Quick and Dirty Data Security"
+author: "Bill Olander, Regional Bureau Dakar, WFP"
+date: "2019-06-11"
+categories:
+  - Security
+tags:
+  - WFP
+---
+
+In this quick tutorial, I share 3 methods to keep you and your data out of trouble.
+
+_Disclaimer_ : the fields of Data Security and Data Protection are vast. This tutorial hardly skims the surface. Check with your institution on the specific standards and tools which may be relevant to you.
+
+## Quick note on the tutorial
+
+You should be able to follow and recreate all of the results by copying the syntax in the grey boxes.
+
+## Installing packages
+
+To get started, if you don’t have them already, the following packages are necessary: `charlatan`,`dpylr`,`safer` and `anonymizer`. Note that you will need to install `anonymizer` from github as the package is not available on CRAN 
+
+```{r}
+## Getting all necessary package
+
+using <- function(...) {
+    libs <- unlist(list(...))
+    req <- unlist(lapply(libs,require,character.only = TRUE))
+    need <- libs[req == FALSE]
+    if (length(need) > 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+
+using("charlatan","dpylr","safer")
+
+#devtools::install_github("paulhendricks/anonymizer")
+library(anonymizer)
+
+## Also removing files if exist
+fn <- "fakedata.csv"
+if (file.exists(fn))   file.remove(fn)
+fn <- "fakedata_encrypted.csv"
+if (file.exists(fn))   file.remove(fn)
+fn <- "fakedata_decrypted.csv"
+if (file.exists(fn))   file.remove(fn)
+
+```
+
+
+
+## Make a fake dataset
+
+We can use the charlatan package to create a dataset with some fake sensitive data:
+
+first, let’s load charlatan and let’s quickly make a fake dataset that has names, jobs and phone numbers for 30 people
+```{r}
+library("charlatan")
+
+fakedata <- ch_generate('name', 'job', 'phone_number', n = 30)
+```
+
+Then, let’s add 4 more fake variables: Food Consumption Groups (fcg), admin1name and GPS coordinates (lat & long)
+```{r}
+fakedata$fcg <- rep(c("poor", "borderline", "acceptable"), 10)
+fakedata$adm1name <- rep(c("North", "Mountain", "Isles", "Rock", "Stormlands",  "Dorne"), 5)
+x <- fraudster()
+fakedata$lat <- round(replicate(30, x$lat()),2)
+fakedata$long <- round(replicate(30, x$lon()),2)
+```
+
+last, let’s take a look at the dataset we created
+```{r}
+str(fakedata)
+```
+
+
+## Case #1 : Get rid of sensitive information before sharing
+
+Maybe we only need to share the job , adm1name and fcg variables with someone else - these three variables are not “sensitive” so all we have to do is keep them or exclude the other variables in the dataset. Doing this is easy using select verb from dplyr
+
+first, let’s load `dplyr` and let’s create the dataset we’d like to share, `fakedata_external` , from the dataset `fakedata` , selecting only the variables `job` , `adm1name` and `fcg`.
+
+```{r}
+library(dplyr)
+
+fakedata_external <- fakedata %>% 
+                     select(job, adm1name, fcg)
+```
+take a look - it only contains the 3 variables and is safe for sharing
+
+```{r}
+str(fakedata_external)
+```
+
+Alternatively, instead of specifying the variables you want to keep, like we did above, you can just specify the variables you want to get rid of.
+
+Let's create the dataset fakedata_external2 from the dataset fakedata , by de-selecting the variables `name` , `phone_number` , `lat` , `long`.
+
+```{r}
+fakedata_external2 <- fakedata %>% 
+                      select(-name, -phone_number, -lat, -long)
+```
+voila, we get the same results as above
+
+```{r}
+str(fakedata_external2)
+```
+
+
+
+## Case #2 : Anonymize sensitive information for sharing
+
+We might want to transform or anonymize sensitive information so it can be used but with less risk.
+
+We can anonymize variables using the anonymizer (read more about it on the [anonymizer package documentation]https://github.com/paulhendricks/anonymizer)  and the mutate verb from `dplyr`.
+
+First, let’s load `anonymizer` and `dplyr` and let’s create the dataset fakedata_anonymized with anonymized values for the variables `name` , `phone_number` , `lat` , `long` using the algorithm `crc32` (you can read more about this and other options in the anonymizer documentation)
+
+```{r}
+library(anonymizer)
+library(dplyr)
+
+fakedata_anonymized <- mutate(fakedata, 
+                              name = anonymize(name, .algo = "crc32"), 
+                              phone_number = anonymize(phone_number, .algo = "crc32"), 
+                              lat = anonymize(lat, .algo = "crc32"), 
+                              long = anonymize(long, .algo = "crc32"))
+
+```
+
+Let’s take a look
+
+```{r}
+str(fakedata_anonymized)
+```
+
+yep, all the variables with sensitive data have now been anonymized.
+
+
+## Case #3 : Encrypt a file containing sensitive information
+
+Finally, sometimes we might need to share the whole dataset in its original condition. To do this, we’ll want to encrypt the dataset and we can use the [package safer](https://cran.r-project.org/web/packages/safer/index.html)
+
+First, let’s load safer and 
+```{r}
+library(safer)
+write.csv(fakedata, "fakedata.csv")
+```
+
+Now, we will create the file fakedata_encrypted.csv by encrypting the file the fakedata . We created the password/key `m@keupuR0wnp@ss`
+
+```{r}
+encrypt_file(infile = "fakedata.csv", key = "m@keupuR0wnp@ss", outfile = "fakedata_encrypted.csv")
+```
+
+importing and taking a quick look, fakedata_encrypted.csv looks unusable to those without the key
+
+```{r}
+
+tried <- try(read.csv("fakedata_encrypted.csv"),
+                 silent = TRUE)
+head(tried, 2)
+```
+
+
+but if we share fakedata_encrypted.csv along with the key (it’s good to send the key to the recipient in a separate message, not in the same message/method that you share the encrypted file), your recipient can use the following code to decrypt the file
+
+```{r}
+decrypt_file(infile = "fakedata_encrypted.csv", key = "m@keupuR0wnp@ss", outfile = "fakedata_decrypted.csv")
+```
+
+take a look, we’ve decrypted it and it’s now useable
+
+```{r}
+fakedata_decrypted <- read.csv("fakedata_decrypted.csv")
+
+str(fakedata_decrypted)
+```
+
+
+## The End
+
+To wrap up, here are the 3 different scenarios which you might find yourself needing to transform and share sensitive data:
+
+* __Case 1 - Get rid of only the sensitive data__ - use select verb to create a new data set which doesn’t contain the sensitive variables
+
+* __Case 2 - Anonymize sensitive data__: use package anonymizer and mutate verb to anonymize sensitive variables
+
+* __Case 3 - Encrypt sensitive data__: use package safer to create an encypted dataset. send your recipient the password seperately and they’ll be able to use safer to decrypt the file.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
