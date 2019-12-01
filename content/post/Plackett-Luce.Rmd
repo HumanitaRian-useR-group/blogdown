@@ -1,0 +1,325 @@
+---
+title: "Estimation of sectoral priorities: Borda Count & Plackett-Luce model"
+author: "Benini & Sons"
+date: "2019-12-03"
+categories:
+  - Indicator
+  - Prioritisation
+tags:
+  - Okular-Analytics
+  - Benini
+---
+
+
+Ratings and rankings account for the majority of data generated in the course of rapid key informant needs assessments during humanitarian emergencies. Using this information to develop consolidated need prioritisation comes with challenges. 
+<!--MORE-->
+
+Practically speaking, the method presented here can be used for dataset that includes question such as
+
+> what's your first need? _(select_one among different options)_
+
+> what's your second need? _(select_one among different options)_
+
+> what's your third need? _(select_one among different options)_
+
+
+This tutorial is based on the publication [Priorities and preferences in humanitarian needs assessments -Their measurement by rating and ranking methods](http://aldo-benini.org/Level2/HumanitData/OkularAnalytics_Priorities_and_Preferences_v2019_01_23.pdf). Humanitarian needs assessments seek to establish priorities for action and preferences of those whom the action will affect. Assessment teams collect data meant to capture the severity of problems and the situational aspects that matter in the evaluation of response options. Needs assessments establish priorities whereas  __response plans seek viable compromises between priorities__ and the means to address them.
+
+When samples of stakeholders, such as key informants or relief workers, state priorities or preferences, the information chiefly produces __ratings or rankings__ and such data are ordinal. In summarizing them, we need to avoid operations that require metric variables (such as the arithmetic mean) wich does not account for compensability; yet we will seek methods that produce aggregates with metric qualities (such as Borda counts) as these have a higher information value and offer greater flexibility for subsequent prioritisation analyses.
+
+When aggregating rating and ranking data and about the interpretation of the resulting measures of priority and preference, two distinctions are fundamental: 
+
+ * The first concerns __statistical independence__: Ratings (such as of the severity of unmet needs invarious sectors), though cognitively interdependent among items, statistically are independent. Rankings reflect an order among items and are dependent in both respects.For the analysis, both types have pros and cons; they contribute the most when used in tandem. This can happen during data collection – by asking both rating and ranking questions – and/or in the analysis – such as by ranking aggregate measures from ratings.
+
+ * Second, certain measures characterize __cases__ (units like geographical areas, communities,camps, eventually households and individuals), while others express __relationships with items__ (formally: options, aspects, attributes, indicators; substantively: sectors, agencies,problems, etc.). Methods suitable to compare Case A vs. Case B as well as Item X vs. Y are few; most of those based on ordinal data work only in one or the other way, not both.
+
+
+## Problem statement
+
+ Borda implicitly makesseveral strong assumptions. Respondents are aware that they exercise voting
+
+The Plackett-Luce model of rankings overcomes analysis barrier linked to the analysis of ranked preferences and priorities: 
+
+ * It produces a true ratio-level measure of the strength of preferences from full or partial choices. 
+ 
+ * It tests for differences between items follow from confidence intervals; so that such difference can be extended for groups within a given item. 
+ 
+The Plackett-Luce model supplies a stronger measure. It is ratio level. Moreover, it is basedon more intuitive behavioral assumptions than the Borda count. 
+
+
+In this tutorial, we will present code to implement quickly those 2 methods.
+
+## Loading packages & Function
+
+
+```{r setup, include = TRUE, message = FALSE, warning = FALSE, echo = TRUE}
+## This function will retrieve the packae if they are not yet installed.
+using <- function(...) {
+    libs <- unlist(list(...))
+    req <- unlist(lapply(libs,require,character.only = TRUE))
+    need <- libs[req == FALSE]
+    if (length(need) > 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+## Getting all necessary package
+using("foreign", "PlackettLuce", "tidyverse", "qvcalc","kableExtra","stargazer","NLP",
+                     "ggthemes", "ggrepel", "GGally", "bbplot","ggpubr")
+
+rm(using)
+
+# This small function is used to have nicely left align text within charts produced with ggplot2
+left_align <- function(plot_name, pieces){
+  grob <- ggplot2::ggplotGrob(plot_name)
+  n <- length(pieces)
+  grob$layout$l[grob$layout$name %in% pieces] <- 2
+  return(grob)
+}
+
+## Fonction to calculate borda count
+AvgRank <- function(BallotMatrix){
+    Ballots <- as.matrix(BallotMatrix[, -1], mode = "numeric")
+    Num_Candidates <- dim(Ballots)[1]
+    Names <- BallotMatrix[, 1]
+    Ballots[is.na(Ballots)] <- Num_Candidates + 1 #Treat blanks as one worse than min
+    MeanRanks <- rowMeans(Ballots)
+    Rankings <- data.frame(Names, MeanRanks)
+    Rankings <- Rankings[order(rank(Rankings[, 2], ties.method = "random")), ] #Ties handled through random draw
+    Rankings <- data.frame(Rankings, seq_along(Rankings[, 1]))
+    names(Rankings) <- c("Items", "Average Rank", "Position")
+    return(Rankings)  
+}
+
+
+```
+
+## Dataset
+
+The data used in the this tutorial comes from NPM Site Assessment Round 11, 2018 - for  the  Rohingya  refugee camps in Bangladesh.
+
+```{r , include=TRUE, echo = TRUE}
+data_csv <- read.csv(file = "181227_2027AB_NPM11_Priorities_PlackettLuce.csv", header = T, sep = ",")
+
+# Structure of the data:
+#str(data_csv)
+```
+
+When loaded in R, all non-numeric data columns are read as factors when loading csv  because of argument `default.stringsAsFactors()`.
+
+The model-fitting function in PlackettLuce, requires data in the form of rankings, with the rank (1st, 2nd, 3rd, …) for each item. Therefore transformation is required for the data in their orginal stage as we can see below.
+```{r , include=TRUE, echo = TRUE}
+ 
+used_var <- as.character(names(data_csv))[grepl("l_",as.character(names(data_csv)))]
+ 
+ kable( data_csv[1:10 , c("block_id","population","priority1","priority3","priority3") ], 
+       caption = "Data Overview") %>%
+        kable_styling(bootstrap_options = c("striped", "bordered", "condensed", "responsive"), font_size = 9)
+
+```
+The analysis will provide estimates for priorities among __10 areas of need__ extracted from those 3 variables. Arguments to be used the Plackett-Luce model have been prefixed "l_" so that they can retrieved automatically. 
+
+## Borda Count
+
+
+```{r , include=TRUE, echo = TRUE}
+
+## transpose the data
+
+vote <- t(data_csv[ , c(used_var)])
+
+borda <- AvgRank(vote)
+
+borda$Items <- row.names(borda)
+row.names(borda) <- NULL
+
+kable( borda, 
+       caption = "Borda Count per sector") %>%
+        kable_styling(bootstrap_options = c("striped", "bordered", "condensed", "responsive"), font_size = 9)
+
+
+```
+
+## Plackett-Luce Model
+
+### Generate the model
+
+In the needs assessment context, we call the Plackett-Luce-"worth" coefficients "Intensities"; this terminology is arbitrary. Error messages below will apppear but  are specific of this dataset and can be ignored.
+
+```{r , include=TRUE, echo = TRUE}
+data_csv %>%
+  dplyr::select(starts_with("l_")) %>%
+  PlackettLuce() -> intensities
+
+#names(intensities)
+# Summary of intensities:
+# "ref = NULL" sets the mean of all intensities as the reference value.
+# Else the first item would be the reference, with its coefficent constrained to 0.
+
+Plackett_Luce_est <- summary(intensities, ref = NULL)
+
+Plackett_Luce_est
+
+```
+
+
+### Preparations for confidence intervals
+
+First, we prepare a table for export, stripping the prefix "l_". We ensure items will be listed in the sequence of the arguments, not alphabetically.
+
+```{r , include=TRUE, echo = TRUE}
+Plackett_Luce_est$coefficients %>%
+  gsub(pattern     = "l_",
+       replacement = "",
+       x           = row.names(.)) %>%
+  factor(x = ., levels = .) -> items
+data.frame(items_num = as.integer(items),
+           items     = items,
+           Plackett_Luce_est$coefficients) -> Plackett_Luce_est_z.values
+
+kable(Plackett_Luce_est_z.values, caption = "Model estimation") %>%
+           kable_styling(bootstrap_options = c("striped", "bordered", "condensed", "responsive"), font_size = 9)
+
+# ========================================================================
+# Export output: if needed
+# ------------------------------------------------------------------------
+# write.csv(x         = Plackett_Luce_est_z.values,
+#           file      = paste0(path.output, "/", "Plackett_Luce_coef_table.csv"),
+#           row.names = F)
+```
+
+
+In order to obtain confidence intervals, quasi-variances of the coefficients are needed:
+
+```{r , include=TRUE, echo = TRUE}
+qv <- qvcalc(intensities, ref = NULL)
+summary(qv)
+
+#plot(qv, xlab = "Needs Priorities", ylab = "Worth (log)", main = NULL)
+
+```
+
+
+We strips prefix "l_" in preparation for export and ensure that items will be listed in the sequence of the arguments, not alphabetically.
+
+```{r , include=TRUE, echo = TRUE}
+
+qv$qvframe %>%
+  gsub(pattern     = "l_",
+       replacement = "",
+       x           = row.names(.)) %>%
+  factor(x = ., levels = .) -> items
+
+```
+
+
+Now we computes additional columns needed for 95%-CIs and exponentiate coefficent and CI bound estimates, in accordance with Plackett-Luce Model.
+
+```{r , include=TRUE, echo = TRUE}
+qv$qvframe %>% # qv table ...
+  data.frame(items_num = as.integer(items),
+             items     = items,
+             .) %>%
+  mutate(quasiSD  = sqrt(quasiVar),
+         quasiLCI = estimate - quasiSD * qnorm(0.975, 0, 1),
+         quasiUCI = estimate + quasiSD * qnorm(0.975, 0, 1),
+         expLCI   = exp(quasiLCI),
+         expEst   = exp(estimate),
+         expUCI   = exp(quasiUCI)) -> qv_estim_CI
+
+## Sort based on preference level
+qv_estim_CI <- qv_estim_CI[ order(-  qv_estim_CI$expEst), ]
+qv_estim_CI$items <- reorder(qv_estim_CI$items, qv_estim_CI$expEst)
+
+
+kable(qv_estim_CI, caption = "Model Confidence Interval") %>%
+           kable_styling(bootstrap_options = c("striped", "bordered", "condensed", "responsive"), font_size = 9)
+
+#str(qv_estim_CI)
+# ========================================================================
+# Export output:
+# ------------------------------------------------------------------------
+# write.csv(x         = qv_estim_CI,
+#           file      = paste0(path.output, "/", "Plackett_Luce_estimates_CI.csv"),
+#           row.names = F)
+
+```
+
+### Visualise Results
+
+In order to visualise the results together with the confidence interval, the best type visual is called a _Forest plot_.
+
+There's a default plot in [PlackettLuce package](https://hturner.github.io/PlackettLuce/) but we can also use ggplot2.
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 10, fig.height=5, size="small"}
+
+plot1 <- ggplot(data = qv_estim_CI, 
+             aes( x = items, 
+                  y = expEst, 
+                  ymin = expLCI,
+                  ymax = expUCI)) +
+      # geom_pointrange(color = "purple", shape = 18,  size = 2) + 
+  
+        geom_point(color = "purple", shape = 18,  size = 5) + 
+        geom_errorbar(aes(xmax = expLCI, xmin = expLCI), height = 1, color = "black", width = 0.2, size = 1) +
+  
+        #geom_hline(yintercept = 1, lty = 2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Preference Level") +
+        ylab("") +
+        labs(title = " At first: Food, Water & Fuel!",
+                 subtitle =  "Sectorial Preference, analysis based on Plackett-Luce model",
+                 caption = "The black lines (also called 'whiskers') around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)",
+                 x = NULL, y = NULL) +
+          bbc_style() +
+            theme( plot.title = element_text(size = 14),
+                   plot.subtitle = element_text(size = 12),
+                   plot.caption = element_text(size = 7, hjust = 1),
+                  axis.text = element_text(size = 9),
+                  panel.grid.major.x = element_line(color = "#cbcbcb"), 
+                  panel.grid.major.y = element_blank(),
+                  strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c("subtitle", "title", "caption")), ncol = 1, nrow = 1)
+```
+
+## Compare Borda Count & Plackett-Luce Model
+
+Plackett-Luce does not score observed ranks mechanically, as Borda does. Rather, it considers the tendency for items to be at the higher end of the observed ranks and then extrapolates that information into simulated rankings of the unobserved ranks.
+
+The Borda count is indifferent to the unobserved rank orders. It is uninformative in this regard.
+
+We can compare the 2 method with the chart below:
+
+```{r model1, echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 10, fig.height=5, size="small"}
+
+plot1 <- ggplot(data = qv_estim_CI, 
+             aes( x = items, 
+                  y = expEst, 
+                  ymin = expLCI,
+                  ymax = expUCI)) +
+      # geom_pointrange(color = "purple", shape = 18,  size = 2) + 
+  
+        geom_point(color = "purple", shape = 18,  size = 5) + 
+        geom_errorbar(aes(xmax = expLCI, xmin = expLCI), height = 1, color = "black", width = 0.2, size = 1) +
+  
+        #geom_hline(yintercept = 1, lty = 2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab("Preference Level") +
+        ylab("") +
+        labs(title = " At first: Food, Water & Fuel!",
+                 subtitle =  "Sectorial Preference, analysis based on Plackett-Luce model",
+                 caption = "The black lines (also called 'whiskers') around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)",
+                 x = NULL, y = NULL) +
+          bbc_style() +
+            theme( plot.title = element_text(size = 14),
+                   plot.subtitle = element_text(size = 12),
+                   plot.caption = element_text(size = 7, hjust = 1),
+                  axis.text = element_text(size = 9),
+                  panel.grid.major.x = element_line(color = "#cbcbcb"), 
+                  panel.grid.major.y = element_blank(),
+                  strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c("subtitle", "title", "caption")), ncol = 1, nrow = 1)
+```

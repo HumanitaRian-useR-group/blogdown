@@ -5,8 +5,10 @@ date: "2019-02-27"
 categories:
   - DataViz
   - Animation
-tags:
   - rhdx
+  - API
+tags:
+  - Ahmadou-Dicko
 ---
 
 
@@ -15,6 +17,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 In this short post (crossposted [here](https://www.ahmadoudicko.com/post/sahel-fatalities/)), we will show how to use the `rhdx`, `dplyr`, `purrr`, `sf` and `gganimate` R packages to show the number of fatal incidents in 5 Sahelian countries.
+
+<!--MORE-->
+
 The [`rhdx`](https://gitlab.com/dickoa/rhdx) package is not yet on CRAN, so you will need to use the [`remotes`](https://cran.r-project.org/web/packages/remotes/index.html) package to install it first:
 
 ```{r, eval=FALSE}
@@ -88,52 +93,51 @@ We will select the first 5 datasets (our 5 countries) in the list of datasets an
 ```{r, message=FALSE, warning=FALSE}
 g5_acled <- g5_acled[1:5] ## pick the first 5 the 6th is the Africa wide dataset
 
-## create a helper function to read resources from each dataset
-read_acled_data <- function(dataset) {
-  dataset %>%
-    get_resource(1) %>%
-    read_resource(force_download = TRUE)
-}
-
-g5_acled_data <- map_df(g5_acled, read_acled_data)
-glimpse(g5_acled_data)
+# ## create a helper function to read resources from each dataset
+# read_acled_data <- function(dataset) {
+#   dataset %>%
+#     get_resource(1) %>%
+#     read_resource(force_download = TRUE)
+# }
+# 
+# g5_acled_data <- map_df(g5_acled, read_acled_data)
+# glimpse(g5_acled_data)
 ```
 
 We have all the data we need for our analysis, we just need to aggregate total number fatalities by geographical coordinates, countries and year.
 
 ```{r, message=FALSE, warning=FALSE}
-g5_acled_fatalities_loc <- g5_acled_data %>%
-  filter(year %in% 2012:2018, fatalities > 0) %>%
-  group_by(year, country, latitude, longitude) %>%
-  summarise(total_fatalities = sum(fatalities, na.rm = TRUE)) %>%
-  arrange(year) %>%
-  ungroup()
+# g5_acled_fatalities_loc <- g5_acled_data %>%
+#   filter(year %in% 2012:2018, fatalities > 0) %>%
+#   group_by(year, country, latitude, longitude) %>%
+#   summarise(total_fatalities = sum(fatalities, na.rm = TRUE)) %>%
+#   arrange(year) %>%
+#   ungroup()
 ```
 
 We can finally use our boundaries (`g5_ab`), the conflict data (`g5_acled_fatalities_loc`) with `gganimate` to dynamically visualize the different fatal incidents in G5 Sahel countries.
 
 ```{r anim_map, message=FALSE, warning=FALSE}
-g5_ab %>%
-  ggplot() +
-  geom_sf(fill = "#383838", color = "gray") +
-  coord_sf(datum = NA) +
-  geom_point(data = g5_acled_fatalities_loc, aes(longitude, latitude, size = total_fatalities, fill = total_fatalities), shape  = 21, color = "transparent") +
-  scale_fill_viridis_c(option = "plasma") +
-  geom_sf_text(aes(label = admin0Name), color = "gray", fontface = "bold") +
-  labs(x = "",
-       y = "",
-       title = "Fatal events in the Sahel G5",
-       subtitle = "for the year {current_frame}",
-       caption = "source: ACLED") +
-  theme_void() +
-  theme(legend.position = "none") +
-  transition_manual(year, cumulative = TRUE) +
-  shadow_mark()
+# g5_ab %>%
+#   ggplot() +
+#   geom_sf(fill = "#383838", color = "gray") +
+#   coord_sf(datum = NA) +
+#   geom_point(data = g5_acled_fatalities_loc, aes(longitude, latitude, size = total_fatalities, fill = total_fatalities), shape  = 21, color = "transparent") +
+#   scale_fill_viridis_c(option = "plasma") +
+#   geom_sf_text(aes(label = admin0Name), color = "gray", fontface = "bold") +
+#   labs(x = "",
+#        y = "",
+#        title = "Fatal events in the Sahel G5",
+#        subtitle = "for the year {current_frame}",
+#        caption = "source: ACLED") +
+#   theme_void() +
+#   theme(legend.position = "none") +
+#   transition_manual(year, cumulative = TRUE) +
+#   shadow_mark()
+
 ```
 
-```{r anim, echo=FALSE, out.width = "100%"}
-knitr::include_graphics("https://gitlab.com/dickoa/dickoa.gitlab.io/raw/master/static/post/sahel-fatalities_files/figure-html/anim_map-1.gif")
-```
+
 
 Session info for this analysis.
 

@@ -1,16 +1,20 @@
 ---
-title: 'Accessing data from REST API using R: examples for KoBoToolbox and Country
-  Based Pooled Fund (CBPF) data'
-author: Punya Prasad Sapkota
+title: "Accessing data from REST API using R: examples for KoBoToolbox and Country Based Pooled Fund (CBPF) data"
+author: "Punya Prasad Sapkota"
 date: '2018-12-08'
 categories:
   - Data
-tags:
   - KoBoToolbox
+  - API
   - WebData
+tags:
+  - Punya-Prasad-Sapkota
+  - IMMAP
 ---
 
 R program has become a language of choice for data science work. It has rich feature library that can be readily used for variety of data management tasks. This article focuses on accessing data from the [KoBoToolbox](https://kobo.humanitarianresponse.info/).
+
+<!--MORE-->
 
 # KoBoToolbox
 [KoBoToolbox](http://support.kobotoolbox.org/getting-started/welcome/welcome-to-kobotoolbox) provides a suite of tools for field data collection in the challenging environments. It is free and open source and works both on and offline.

@@ -5,8 +5,11 @@ date: "2019-03-24"
 categories:
   - DataViz
   - Animation
+  - Refugee
+  - API
 tags:
   - UNHCR
+  - Edouard-Legoupil
 ---
 
 
@@ -16,6 +19,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 "Bar Chart Race" are a specific type of bar chart that moves to show rankings over time. It became recently a quite popular approach to bring a storytelling elements within a longitudinal dataset. Readers are suggested to connect and combine what they see on the chart with other qualitive elements that they know about (elements of history). By using the allegory of  F1 Race, it gives a very dynamic dimension. 
+
+<!--MORE-->
 
 You can check below a series of Viz on different issues:
 

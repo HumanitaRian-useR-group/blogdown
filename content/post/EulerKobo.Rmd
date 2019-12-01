@@ -4,9 +4,10 @@ author: "Oleksandr Yaroshenko"
 date: "2019-04-16"
 categories:
   - DataViz
-  - Animation
+  - Kobotoolbox
 tags:
   - UNHCR
+  - Oleksandr-Yaroshenko
 ---
 
 
@@ -14,6 +15,7 @@ tags:
 Multiple choice question in which respondent can select more than one correct answer from the list is a usual part of almost every survey.
 
 It is usually visualized as a simple bar chart ignoring the overlap between the different categories, while this overlap can bring more analytical value and depth to the analysis.
+<!--MORE-->
 
 Euler diagram is a perfect way to show the relationship between different subsets and that’s hardly possible to build it with the commonly used spreadsheet software such as MS Excel. 
 
@@ -32,7 +34,7 @@ library(tidyverse)
 library(eulerr)
 ```
 
-##get the data with koboloadeR
+## Get the data with koboloadeR
 
 ```{r}
 # download the data with your credentials
@@ -56,7 +58,7 @@ library(eulerr)
 
 ```
 
-##make euler chart with identified dataset
+## Make euler chart with identified dataset
 
 A note of caution: there are many ways this process might look like and depending on your flow it can be changed.
 In this example we just concentrate on this narrow task of building a simple Euler chart.
@@ -78,7 +80,7 @@ In this example we just concentrate on this narrow task of building a simple Eul
 
 ```
 
-##if there are more than 6 columns
+## If there are more than 6 columns
 you may want to limit the number of columns as
 * plot might be very busy and not readable
 * it is computationally heavy and may require significant resources to render the plot
@@ -125,7 +127,7 @@ https://cran.r-project.org/web/packages/eulerr/vignettes/under-the-hood.html
 ```
 
 
-##an example with a dummy variables
+## An example with a dummy variables
 
 you may want to read more here:
 https://cran.r-project.org/web/packages/eulerr/vignettes/venn-diagrams.html 
@@ -133,7 +135,7 @@ https://cran.r-project.org/web/packages/eulerr/vignettes/venn-diagrams.html
 ```{r}
 #generate a matrix of 20 columns with logic values
 
-randomBool <- sample(c(TRUE,FALSE),size=10000, replace=TRUE, prob = c(0.25, 0.75))
+randomBool <- sample(c(TRUE,FALSE),size = 10000, replace = TRUE, prob = c(0.25, 0.75))
 dfRandom <- data.frame(matrix(data = randomBool, ncol = 20, nrow = 500))
 
 # let's limit the number of columns (variables)

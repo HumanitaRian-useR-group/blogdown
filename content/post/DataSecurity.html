@@ -1,0 +1,195 @@
+---
+title: "Quick and Dirty Data Security"
+author: "Bill Olander"
+date: "2019-06-11"
+categories:
+  - Security
+tags:
+  - WFP
+  - Bill-Olander
+---
+
+
+
+<p>In this quick tutorial, I share 3 methods to keep you and your data out of trouble.
+<!--MORE--></p>
+<p><em>Disclaimer</em> : the fields of Data Security and Data Protection are vast. This tutorial hardly skims the surface. Check with your institution on the specific standards and tools which may be relevant to you.</p>
+<div id="quick-note-on-the-tutorial" class="section level2">
+<h2>Quick note on the tutorial</h2>
+<p>You should be able to follow and recreate all of the results by copying the syntax in the grey boxes.</p>
+</div>
+<div id="installing-packages" class="section level2">
+<h2>Installing packages</h2>
+<p>To get started, if you don’t have them already, the following packages are necessary: <code>charlatan</code>,<code>dpylr</code>,<code>safer</code> and <code>anonymizer</code>. Note that you will need to install <code>anonymizer</code> from github as the package is not available on CRAN</p>
+<pre class="r"><code>## Getting all necessary package
+
+using &lt;- function(...) {
+    libs &lt;- unlist(list(...))
+    req &lt;- unlist(lapply(libs,require,character.only = TRUE))
+    need &lt;- libs[req == FALSE]
+    if (length(need) &gt; 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+
+using(&quot;charlatan&quot;,&quot;dpylr&quot;,&quot;safer&quot;)</code></pre>
+<pre><code>## Loading required package: charlatan</code></pre>
+<pre><code>## Loading required package: dpylr</code></pre>
+<pre><code>## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called &#39;dpylr&#39;</code></pre>
+<pre><code>## Loading required package: safer</code></pre>
+<pre><code>## Installing package into &#39;/home/edouard/R/x86_64-pc-linux-gnu-library/3.6&#39;
+## (as &#39;lib&#39; is unspecified)</code></pre>
+<pre><code>## Warning: package &#39;dpylr&#39; is not available (for R version 3.6.1)</code></pre>
+<pre><code>## Loading required package: dpylr</code></pre>
+<pre><code>## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called &#39;dpylr&#39;</code></pre>
+<pre><code>## [[1]]
+## [1] FALSE</code></pre>
+<pre class="r"><code>#devtools::install_github(&quot;paulhendricks/anonymizer&quot;)
+library(anonymizer)
+
+## Also removing files if exist
+fn &lt;- &quot;fakedata.csv&quot;
+if (file.exists(fn))   file.remove(fn)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>fn &lt;- &quot;fakedata_encrypted.csv&quot;
+if (file.exists(fn))   file.remove(fn)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>fn &lt;- &quot;fakedata_decrypted.csv&quot;
+if (file.exists(fn))   file.remove(fn)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+</div>
+<div id="make-a-fake-dataset" class="section level2">
+<h2>Make a fake dataset</h2>
+<p>We can use the charlatan package to create a dataset with some fake sensitive data:</p>
+<p>first, let’s load charlatan and let’s quickly make a fake dataset that has names, jobs and phone numbers for 30 people</p>
+<pre class="r"><code>library(&quot;charlatan&quot;)
+
+fakedata &lt;- ch_generate(&#39;name&#39;, &#39;job&#39;, &#39;phone_number&#39;, n = 30)</code></pre>
+<p>Then, let’s add 4 more fake variables: Food Consumption Groups (fcg), admin1name and GPS coordinates (lat &amp; long)</p>
+<pre class="r"><code>fakedata$fcg &lt;- rep(c(&quot;poor&quot;, &quot;borderline&quot;, &quot;acceptable&quot;), 10)
+fakedata$adm1name &lt;- rep(c(&quot;North&quot;, &quot;Mountain&quot;, &quot;Isles&quot;, &quot;Rock&quot;, &quot;Stormlands&quot;,  &quot;Dorne&quot;), 5)
+x &lt;- fraudster()
+fakedata$lat &lt;- round(replicate(30, x$lat()),2)
+fakedata$long &lt;- round(replicate(30, x$lon()),2)</code></pre>
+<p>last, let’s take a look at the dataset we created</p>
+<pre class="r"><code>str(fakedata)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    30 obs. of  7 variables:
+##  $ name        : chr  &quot;Dr. Randy Pfannerstill V&quot; &quot;Jarrad Olson-Stracke&quot; &quot;Emogene Goodwin&quot; &quot;Bascom Koch&quot; ...
+##  $ job         : chr  &quot;Environmental consultant&quot; &quot;Photographer&quot; &quot;English as a foreign language teacher&quot; &quot;Retail manager&quot; ...
+##  $ phone_number: chr  &quot;238-806-6174x569&quot; &quot;1-916-904-8331x54314&quot; &quot;08030585426&quot; &quot;1-527-985-8556x476&quot; ...
+##  $ fcg         : chr  &quot;poor&quot; &quot;borderline&quot; &quot;acceptable&quot; &quot;poor&quot; ...
+##  $ adm1name    : chr  &quot;North&quot; &quot;Mountain&quot; &quot;Isles&quot; &quot;Rock&quot; ...
+##  $ lat         : num  33.3 47.1 -66.6 89.7 -76 ...
+##  $ long        : num  -127.2 -149.3 154.6 93.8 -176.5 ...</code></pre>
+</div>
+<div id="case-1-get-rid-of-sensitive-information-before-sharing" class="section level2">
+<h2>Case #1 : Get rid of sensitive information before sharing</h2>
+<p>Maybe we only need to share the job , adm1name and fcg variables with someone else - these three variables are not “sensitive” so all we have to do is keep them or exclude the other variables in the dataset. Doing this is easy using select verb from dplyr</p>
+<p>first, let’s load <code>dplyr</code> and let’s create the dataset we’d like to share, <code>fakedata_external</code> , from the dataset <code>fakedata</code> , selecting only the variables <code>job</code> , <code>adm1name</code> and <code>fcg</code>.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>fakedata_external &lt;- fakedata %&gt;% 
+                     select(job, adm1name, fcg)</code></pre>
+<p>take a look - it only contains the 3 variables and is safe for sharing</p>
+<pre class="r"><code>str(fakedata_external)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    30 obs. of  3 variables:
+##  $ job     : chr  &quot;Environmental consultant&quot; &quot;Photographer&quot; &quot;English as a foreign language teacher&quot; &quot;Retail manager&quot; ...
+##  $ adm1name: chr  &quot;North&quot; &quot;Mountain&quot; &quot;Isles&quot; &quot;Rock&quot; ...
+##  $ fcg     : chr  &quot;poor&quot; &quot;borderline&quot; &quot;acceptable&quot; &quot;poor&quot; ...</code></pre>
+<p>Alternatively, instead of specifying the variables you want to keep, like we did above, you can just specify the variables you want to get rid of.</p>
+<p>Let’s create the dataset fakedata_external2 from the dataset fakedata , by de-selecting the variables <code>name</code> , <code>phone_number</code> , <code>lat</code> , <code>long</code>.</p>
+<pre class="r"><code>fakedata_external2 &lt;- fakedata %&gt;% 
+                      select(-name, -phone_number, -lat, -long)</code></pre>
+<p>voila, we get the same results as above</p>
+<pre class="r"><code>str(fakedata_external2)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    30 obs. of  3 variables:
+##  $ job     : chr  &quot;Environmental consultant&quot; &quot;Photographer&quot; &quot;English as a foreign language teacher&quot; &quot;Retail manager&quot; ...
+##  $ fcg     : chr  &quot;poor&quot; &quot;borderline&quot; &quot;acceptable&quot; &quot;poor&quot; ...
+##  $ adm1name: chr  &quot;North&quot; &quot;Mountain&quot; &quot;Isles&quot; &quot;Rock&quot; ...</code></pre>
+</div>
+<div id="case-2-anonymize-sensitive-information-for-sharing" class="section level2">
+<h2>Case #2 : Anonymize sensitive information for sharing</h2>
+<p>We might want to transform or anonymize sensitive information so it can be used but with less risk.</p>
+<p>We can anonymize variables using the anonymizer (read more about it on the [anonymizer package documentation]<a href="https://github.com/paulhendricks/anonymizer" class="uri">https://github.com/paulhendricks/anonymizer</a>) and the mutate verb from <code>dplyr</code>.</p>
+<p>First, let’s load <code>anonymizer</code> and <code>dplyr</code> and let’s create the dataset fakedata_anonymized with anonymized values for the variables <code>name</code> , <code>phone_number</code> , <code>lat</code> , <code>long</code> using the algorithm <code>crc32</code> (you can read more about this and other options in the anonymizer documentation)</p>
+<pre class="r"><code>library(anonymizer)
+library(dplyr)
+
+fakedata_anonymized &lt;- mutate(fakedata, 
+                              name = anonymize(name, .algo = &quot;crc32&quot;), 
+                              phone_number = anonymize(phone_number, .algo = &quot;crc32&quot;), 
+                              lat = anonymize(lat, .algo = &quot;crc32&quot;), 
+                              long = anonymize(long, .algo = &quot;crc32&quot;))</code></pre>
+<p>Let’s take a look</p>
+<pre class="r"><code>str(fakedata_anonymized)</code></pre>
+<pre><code>## Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:    30 obs. of  7 variables:
+##  $ name        : chr  &quot;d2e421d6&quot; &quot;c378128e&quot; &quot;e205f2fe&quot; &quot;01a00703&quot; ...
+##  $ job         : chr  &quot;Environmental consultant&quot; &quot;Photographer&quot; &quot;English as a foreign language teacher&quot; &quot;Retail manager&quot; ...
+##  $ phone_number: chr  &quot;99577e90&quot; &quot;6d98e308&quot; &quot;ae3fc32c&quot; &quot;cca13c83&quot; ...
+##  $ fcg         : chr  &quot;poor&quot; &quot;borderline&quot; &quot;acceptable&quot; &quot;poor&quot; ...
+##  $ adm1name    : chr  &quot;North&quot; &quot;Mountain&quot; &quot;Isles&quot; &quot;Rock&quot; ...
+##  $ lat         : chr  &quot;00cfb3e3&quot; &quot;2860e8bf&quot; &quot;140a458c&quot; &quot;6ff47c9e&quot; ...
+##  $ long        : chr  &quot;cea952c8&quot; &quot;eb28284f&quot; &quot;75278005&quot; &quot;8e89df28&quot; ...</code></pre>
+<p>yep, all the variables with sensitive data have now been anonymized.</p>
+</div>
+<div id="case-3-encrypt-a-file-containing-sensitive-information" class="section level2">
+<h2>Case #3 : Encrypt a file containing sensitive information</h2>
+<p>Finally, sometimes we might need to share the whole dataset in its original condition. To do this, we’ll want to encrypt the dataset and we can use the <a href="https://cran.r-project.org/web/packages/safer/index.html">package safer</a></p>
+<p>First, let’s load safer and</p>
+<pre class="r"><code>library(safer)
+write.csv(fakedata, &quot;fakedata.csv&quot;)</code></pre>
+<p>Now, we will create the file fakedata_encrypted.csv by encrypting the file the fakedata . We created the password/key <code>m@keupuR0wnp@ss</code></p>
+<pre class="r"><code>encrypt_file(infile = &quot;fakedata.csv&quot;, key = &quot;m@keupuR0wnp@ss&quot;, outfile = &quot;fakedata_encrypted.csv&quot;)</code></pre>
+<p>importing and taking a quick look, fakedata_encrypted.csv looks unusable to those without the key</p>
+<pre class="r"><code>tried &lt;- try(read.csv(&quot;fakedata_encrypted.csv&quot;),
+                 silent = TRUE)</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote = quote, :
+## line 2 appears to contain embedded nulls</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote = quote, :
+## line 3 appears to contain embedded nulls</code></pre>
+<pre><code>## Warning in read.table(file = file, header = header, sep = sep, quote = quote, :
+## line 5 appears to contain embedded nulls</code></pre>
+<pre><code>## Warning in scan(file = file, what = what, sep = sep, quote = quote, dec = dec, :
+## EOF within quoted string</code></pre>
+<pre><code>## Warning in scan(file = file, what = what, sep = sep, quote = quote, dec = dec, :
+## embedded nul(s) found in input</code></pre>
+<pre class="r"><code>head(tried, 2)</code></pre>
+<pre><code>##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             X
+## 1 IP\xfc@\xc4\xefV\xb8\021e\xeb\x8b /\xc0\xe2Oa\001\xbd\x86\xf6\x96\xde廔&lt;cã\xa27\x96Nn\a\xa8\xe5\x8aĕ9_\xdf\030\xc9\xe4\xf1O\xf66\fcķ\xca\xdḇ\\hT\027i\xb6+\xc7\025\xf7\0345\xec#\x82|\xca\xcfZݚ\xc0\x93\xd0_\xf9\177Z\xc1\030\177\xedx\x85\xf7n\xca\xe6P*60\xb2\x89)\xf6\xe9\xc1\x98\xd4\xc1\xbc\xb0\a6\037\x8c\x97i\xb4@QT1ٯi\xceu\xb7il\xedƷG\xf7F\xb8\xedo\xe5c\xec\022\xb8n\x8bm\x9bh\xf2\0037ls\a\x8e\003ܘ{\xe9\xc5\005\021\xc9s/\xd3W\xdb\xc5\025\xa9j\xd8H\xa4\x89\xce\xf0QI]7]T\x95k\bǳ\x90vϞ\xb1SD
+## 2                                                                                                                                                                                                                                                                                                                      \x94\xd9m\xb0V\xbf\xb3l\x90\x95\x9c\xa0\xc13s\aV37\016\xc83\x98k\xfd?\xb5&lt;\xdb\035f\x83\xd8\017\x82:\xfbu%\xb7\025b.\x99TS\xf4\xb7\xa99d\xd8\xe2 \xde|\x98\x86@ɶi\x88\xa5A\t\xf2Ux\xc1</code></pre>
+<p>but if we share fakedata_encrypted.csv along with the key (it’s good to send the key to the recipient in a separate message, not in the same message/method that you share the encrypted file), your recipient can use the following code to decrypt the file</p>
+<pre class="r"><code>decrypt_file(infile = &quot;fakedata_encrypted.csv&quot;, key = &quot;m@keupuR0wnp@ss&quot;, outfile = &quot;fakedata_decrypted.csv&quot;)</code></pre>
+<p>take a look, we’ve decrypted it and it’s now useable</p>
+<pre class="r"><code>fakedata_decrypted &lt;- read.csv(&quot;fakedata_decrypted.csv&quot;)
+
+str(fakedata_decrypted)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    30 obs. of  8 variables:
+##  $ X           : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ name        : Factor w/ 30 levels &quot;Adrain Stehr-Williamson&quot;,..: 9 16 11 4 19 1 10 2 14 7 ...
+##  $ job         : Factor w/ 28 levels &quot;Acupuncturist&quot;,..: 12 18 11 23 2 9 3 26 23 10 ...
+##  $ phone_number: Factor w/ 30 levels &quot;(115)489-6918x03271&quot;,..: 22 16 11 13 27 1 24 15 14 29 ...
+##  $ fcg         : Factor w/ 3 levels &quot;acceptable&quot;,&quot;borderline&quot;,..: 3 2 1 3 2 1 3 2 1 3 ...
+##  $ adm1name    : Factor w/ 6 levels &quot;Dorne&quot;,&quot;Isles&quot;,..: 4 3 2 5 6 1 4 3 2 5 ...
+##  $ lat         : num  33.3 47.1 -66.6 89.7 -76 ...
+##  $ long        : num  -127.2 -149.3 154.6 93.8 -176.5 ...</code></pre>
+</div>
+<div id="the-end" class="section level2">
+<h2>The End</h2>
+<p>To wrap up, here are the 3 different scenarios which you might find yourself needing to transform and share sensitive data:</p>
+<ul>
+<li><p><strong>Case 1 - Get rid of only the sensitive data</strong> - use select verb to create a new data set which doesn’t contain the sensitive variables</p></li>
+<li><p><strong>Case 2 - Anonymize sensitive data</strong>: use package anonymizer and mutate verb to anonymize sensitive variables</p></li>
+<li><p><strong>Case 3 - Encrypt sensitive data</strong>: use package safer to create an encypted dataset. send your recipient the password seperately and they’ll be able to use safer to decrypt the file.</p></li>
+</ul>
+</div>

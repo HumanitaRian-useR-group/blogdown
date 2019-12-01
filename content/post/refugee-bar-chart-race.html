@@ -1,0 +1,407 @@
+---
+title: "Bar Chart Race for Refugees"
+author: "Edouard Legoupil"
+date: "2019-03-24"
+categories:
+  - DataViz
+  - Animation
+  - Refugee
+  - API
+tags:
+  - UNHCR
+  - Edouard-Legoupil
+---
+
+
+
+<p>“Bar Chart Race” are a specific type of bar chart that moves to show rankings over time. It became recently a quite popular approach to bring a storytelling elements within a longitudinal dataset. Readers are suggested to connect and combine what they see on the chart with other qualitive elements that they know about (elements of history). By using the allegory of F1 Race, it gives a very dynamic dimension.</p>
+<!--MORE-->
+<p>You can check below a series of Viz on different issues:</p>
+<ul>
+<li>10 most populous cities in the world from 1500-2018:</li>
+</ul>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+10 most populous cities in the world from 1500-2018. <a href="https://twitter.com/hashtag/dataviz?src=hash&amp;ref_src=twsrc%5Etfw">#dataviz</a><a href="https://t.co/vtGEBVLdYk">https://t.co/vtGEBVLdYk</a> <a href="https://t.co/uvIkuE4VDI">pic.twitter.com/uvIkuE4VDI</a>
+</p>
+— Randy Olson (<span class="citation">@randal_olson</span>) <a href="https://twitter.com/randal_olson/status/1108031293143556097?ref_src=twsrc%5Etfw">March 19, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<ul>
+<li>10 largest CO2 emitter</li>
+</ul>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+<strong>Bar Chart Race for CO2</strong><br><br>The changing ranks of the 10 largest CO2 emitters in the world since 1850.<br><br>Fascinating to see nations rise, fall &amp; rise again in their yearly emissions*<br><br>See how the UK dominates the C19th &amp; US the 20th.<br><br>Then watch China surge ahead after 2005… <a href="https://t.co/mFLuHB8kTw">pic.twitter.com/mFLuHB8kTw</a>
+</p>
+— Simon Evans (<span class="citation">@DrSimEvans</span>) <a href="https://twitter.com/DrSimEvans/status/1108745504400334849?ref_src=twsrc%5Etfw">March 21, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<ul>
+<li>10 most expensive cities</li>
+</ul>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+Very impressed by the ‘bar chart race’ template from <a href="https://twitter.com/f_l_o_u_r_i_s_h?ref_src=twsrc%5Etfw"><span class="citation">@f_l_o_u_r_i_s_h</span></a>. It doesn't have <a href="https://twitter.com/jburnmurdoch?ref_src=twsrc%5Etfw"><span class="citation">@jburnmurdoch</span></a>'s awesome multipurpose map, but the legend toggle is a lovely touch (1/3) <a href="https://t.co/RbjxTC7V5W">pic.twitter.com/RbjxTC7V5W</a>
+</p>
+— Alex Selby-Boothroyd (<span class="citation">@AlexSelbyB</span>) <a href="https://twitter.com/AlexSelbyB/status/1109239212455460869?ref_src=twsrc%5Etfw">March 22, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>With R, it’s fairly easy to reproduce such vis - We will show here how to use <code>gganimate</code> R packages to display evolution of refugees &amp; IDP’s number over time based on UNHCR statistics</p>
+<pre class="r"><code>## Getting all necessary package
+
+using &lt;- function(...) {
+    libs &lt;- unlist(list(...))
+    req &lt;- unlist(lapply(libs,require,character.only = TRUE))
+    need &lt;- libs[req == FALSE]
+    if (length(need) &gt; 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+
+using(&quot;tidyverse&quot;,&quot;gganimate&quot;,&quot;gghighlight&quot;,&quot;ggpubr&quot;)</code></pre>
+<pre class="r"><code>## loading libraries plus functions
+
+library(tidyverse)
+library(gganimate)
+library(gghighlight)
+library(ggpubr)
+
+
+## a little help function to better format number
+format_si &lt;- function(...) {
+  function(x) {
+    limits &lt;- c(1e-24, 1e-21, 1e-18, 1e-15, 1e-12,
+                1e-9,  1e-6,  1e-3,  1e0,   1e3,
+                1e6,   1e9,   1e12,  1e15,  1e18,
+                1e21,  1e24)
+    prefix &lt;- c(&quot;y&quot;,   &quot;z&quot;,   &quot;a&quot;,   &quot;f&quot;,   &quot;p&quot;,
+                &quot;n&quot;,   &quot;&quot;,   &quot;m&quot;,   &quot; &quot;,   &quot;k&quot;,
+                &quot;M&quot;,   &quot;G&quot;,   &quot;T&quot;,   &quot;P&quot;,   &quot;E&quot;,
+                &quot;Z&quot;,   &quot;Y&quot;)
+
+    # Vector with array indices according to position in intervals
+    i &lt;- findInterval(abs(x), limits)
+
+    # Set prefix to &quot; &quot; for very small values &lt; 1e-24
+    i &lt;- ifelse(i == 0, which(limits == 1e0), i)
+
+    paste(format(round(x/limits[i], 1),
+                 trim = TRUE, scientific = FALSE, ...),
+          prefix[i])
+  }
+}</code></pre>
+<p>Let’s now download the data from UNHCR popstat API</p>
+<pre class="r"><code># Time series
+#url &lt;- paste( &#39;http://popstats.unhcr.org/en/time_series.csv&#39;) 
+#download.file(url, destfile = &quot;unhcr_popstats_export_time_series_all_data.csv&quot; )</code></pre>
+<p>Reshape the data to get the top 10 for each year using tidyverse</p>
+<pre class="r"><code>time_series &lt;- read.csv(&quot;unhcr_popstats_export_time_series_all_data.csv&quot;, skip = 3) 
+## rename the country and make sure Value is a number...
+names(time_series)[2] &lt;- &quot;Country&quot;
+
+## make sure Value is numeric
+time_series$Value &lt;- as.integer(as.character(time_series$Value))
+
+## Check what population type we have there and subset accordingly
+#levels(time_series$Population.type)
+
+time_series2 &lt;- time_series[ time_series$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;, &quot;Internally displaced persons&quot; ), ]
+
+time_series2$Country &lt;- as.character(time_series2$Country)
+time_series2$Country[time_series2$Country == &quot;C\xf4te d&#39;Ivoire&quot;] &lt;- &quot;Cote d&#39;Ivoire&quot; 
+time_series2$Country &lt;- as.factor(time_series2$Country)
+
+time_series$Population.type &lt;- as.factor(as.character(time_series$Population.type))
+
+## Remove unknow countries or blanks
+time_series2 &lt;- time_series2[ !(time_series2$Country %in% c(&quot;Various/Unknown&quot; )), ]
+
+## Remove if value is 0 or NA
+time_series2 &lt;- time_series2[ !(is.na(time_series2$Value)), ]
+time_series2 &lt;- time_series2[ time_series2$Value != 0, ]
+
+## Now get the rank from high to low for all countries per  year and population type
+rank_data &lt;- time_series2 %&gt;%
+  group_by(Year, Population.type, Country) %&gt;%
+  summarise(Value2 = sum(Value) ) 
+
+
+#str(as.data.frame(rank_data))
+rank_data &lt;- as.data.frame(rank_data)
+
+rank_data2 &lt;- rank_data %&gt;%
+  group_by(Year, Population.type) %&gt;%
+  
+  ## Tried first rank but did not provided ranks as integer... 
+  # mutate(ordering = rank(-Value), ties.method = &quot;min&quot;) %&gt;%
+  
+  mutate(ordering = rank(-Value2)) %&gt;%
+  ungroup() 
+
+## check our value for rank -- Note that there are different tie method
+#levels(as.factor(rank_data$ordering))
+
+## need to fix manually issue when ex-aequo rank rank = 8.5 
+
+## In 1962
+rank_data2$ordering[rank_data2$ordering == 10 &amp;
+                      rank_data2$Year == &quot;1962&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;)] &lt;- 11
+
+rank_data2$ordering[rank_data2$ordering == 8.5 &amp;
+                      rank_data2$Year == &quot;1962&quot; &amp;
+                      rank_data2$Country == &quot;Burundi&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;)] &lt;- 9
+
+rank_data2$ordering[rank_data2$ordering == 8.5 &amp;
+                      rank_data2$Year == &quot;1962&quot; &amp;
+                      rank_data2$Country == &quot;Austria&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;)] &lt;- 10
+
+
+## In 1978
+rank_data2$ordering[rank_data2$ordering == 10 &amp;
+                      rank_data2$Year == &quot;1978&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;)] &lt;- 11
+
+rank_data2$ordering[rank_data2$ordering == 8.5 &amp;
+                      rank_data2$Year == &quot;1978&quot; &amp;
+                      rank_data2$Country == &quot;Viet Nam&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;)] &lt;- 9
+
+rank_data2$ordering[rank_data2$ordering == 8.5 &amp;
+                      rank_data2$Year == &quot;1978&quot; &amp;
+                      rank_data2$Country == &quot;United Kingdom&quot; &amp; 
+                      rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;)] &lt;- 10
+
+
+## and for IPDs
+
+rank_data2$Country &lt;- as.character(rank_data2$Country)
+
+## In 1996
+rank_data2$ordering[rank_data2$ordering == 10 &amp;
+                      rank_data2$Year == &quot;1996&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- 11
+
+rank_data2$ordering[rank_data2$ordering == 9.5 &amp;
+                      rank_data2$Year == &quot;1996&quot; &amp;
+                      rank_data2$Country == &quot;Somalia&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- 11
+
+
+rank_data2$Country[rank_data2$ordering == 9.5 &amp;
+                      rank_data2$Year == &quot;1996&quot; &amp;
+                      rank_data2$Country == &quot;Sri Lanka&quot; &amp; 
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- &quot;Sri Lanka / Somalia&quot;
+
+rank_data2$ordering[rank_data2$ordering == 9.5 &amp;
+                      rank_data2$Year == &quot;1996&quot; &amp;
+                      rank_data2$Country == &quot;Sri Lanka / Somalia&quot; &amp; 
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- 10
+
+## in 1997
+rank_data2$ordering[rank_data2$ordering == 10 &amp;
+                      rank_data2$Year == &quot;1997&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- 11
+
+rank_data2$ordering[rank_data2$ordering == 9.5 &amp;
+                      rank_data2$Year == &quot;1997&quot; &amp;
+                      rank_data2$Country == &quot;Somalia&quot; &amp;
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- 11
+
+
+rank_data2$Country[rank_data2$ordering == 9.5 &amp;
+                      rank_data2$Year == &quot;1997&quot; &amp;
+                      rank_data2$Country == &quot;Sri Lanka&quot; &amp; 
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- &quot;Sri Lanka / Somalia&quot;
+
+rank_data2$ordering[rank_data2$ordering == 9.5 &amp;
+                      rank_data2$Year == &quot;1997&quot; &amp;
+                      rank_data2$Country == &quot;Sri Lanka / Somalia&quot; &amp; 
+                      rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;)] &lt;- 10
+
+
+rank_data2$Country &lt;- as.factor(rank_data2$Country)
+
+# Filter only top 10 
+rank_data2 &lt;- rank_data2[rank_data2$ordering &lt;= 10, ]
+#rank_data$Year = as.Date(as.character(rank_data$Year), format = &quot;%Y&quot;)
+
+
+## Regnerate facors modality - 
+rank_data2$Country &lt;- as.factor(as.character(rank_data2$Country))
+# levels(as.factor(rank_data2$Country))
+## Double checking country name
+#table(time_series2$Country, useNA = &quot;ifany&quot;)</code></pre>
+<p>and now visualise</p>
+<pre class="r"><code>ggplot(rank_data2[ rank_data2$Year == 1951 &amp; rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;), ]) +
+  geom_bar(aes(y = Value2,  x =   reorder(ordering, desc(ordering)),
+               group = Country ,color = Country, fill = Country), alpha = 0.75, stat = &quot;identity&quot;) +
+  
+  geom_label(aes(y = 0 , x =  reorder(ordering, desc(ordering)), label = Country),
+             hjust = 0,
+             vjust = 0.5,
+             fill = NA,
+             label.size = NA,
+             family = &quot;Helvetica&quot;,
+             size = 6) +
+
+  coord_flip(clip = &quot;off&quot;, expand = FALSE) +
+  scale_color_viridis_d(option = &quot;plasma&quot; ) +
+  scale_fill_viridis_d(option = &quot;plasma&quot;) +
+  scale_y_continuous(labels = format_si()) +
+  theme_minimal(14, &quot;Avenir&quot;) +
+  
+  guides(color = F, fill = F) +
+  labs(title =  &quot;Top 10 Hosting Countries&quot;,
+       subtitle = &#39;Year 1951&#39;,
+       y = &quot;Population Size&quot;,
+       x = &quot;&quot;,
+       caption =  &quot;Source: UNHCR Population Statistics -http://popstats.unhcr.org &quot;) +
+  theme(plot.title = element_text(hjust = 1, size = 22),
+        axis.ticks.y = element_blank(),
+        axis.text.y  = element_blank(), 
+        panel.background  = element_blank(), 
+        panel.grid = element_blank(),
+        plot.background = element_blank(),
+        legend.position = &quot;bottom&quot;,
+        panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+        panel.grid.major.y = element_blank()) </code></pre>
+<p><img src="/post/refugee-bar-chart-race_files/figure-html/chart1951-1.png" width="672" /></p>
+<p>Faceting by Population Group for 2017</p>
+<pre class="r"><code>ggplot(rank_data2[ rank_data2$Year == 2017, ]) +
+  geom_bar(aes(y = Value2,  x =   reorder(ordering, desc(ordering)),
+               group = Country ,color = Country, fill = Country), alpha = 0.75, stat = &quot;identity&quot;) +
+  
+  geom_label(aes(y = 0 , x =  reorder(ordering, desc(ordering)), label = Country),
+             hjust = 0,
+             vjust = 0.5,
+             fill = NA,
+             label.size = NA,
+             family = &quot;Helvetica&quot;,
+             size = 6) +
+  
+  #facet_wrap( ~ Population.type) +
+  facet_grid(. ~ Population.type) +
+  coord_flip(clip = &quot;off&quot;, expand = FALSE) +
+  scale_color_viridis_d(option = &quot;plasma&quot; ) +
+  scale_fill_viridis_d(option = &quot;plasma&quot;) +
+  scale_y_continuous(labels = format_si()) +
+  theme_minimal(14, &quot;Avenir&quot;) +
+  
+  guides(color = F, fill = F) +
+  labs(title =  &quot;Top 10 Countries&quot;,
+       subtitle = &#39;Year 2017&#39;,
+       y = &quot;Population Size&quot;,
+       x = &quot;&quot;,
+       caption =  &quot;Source: UNHCR Population Statistics -http://popstats.unhcr.org &quot;) +
+  theme(plot.title = element_text(hjust = 1, size = 22),
+        axis.ticks.y = element_blank(),
+        axis.text.y  = element_blank(), 
+        panel.background  = element_blank(), 
+        panel.grid = element_blank(),
+        plot.background = element_blank(),
+        legend.position = &quot;bottom&quot;,
+        panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+        panel.grid.major.y = element_blank()) </code></pre>
+<p><img src="/post/refugee-bar-chart-race_files/figure-html/chart2017facet-1.png" width="672" /></p>
+<p>and animate…. the bar chart race…</p>
+<pre class="r"><code>p &lt;- ggplot(rank_data2[rank_data2$Population.type %in% c(&quot;Refugees (incl. refugee-like situations)&quot;), ]) +
+  geom_bar(aes(y = Value2,  x =   reorder(ordering, desc(ordering)),
+               group = Country ,color = Country, fill = Country), alpha = 0.75, stat = &quot;identity&quot;) +
+  
+  geom_label(aes(y = 0 , x =  reorder(ordering, desc(ordering)), label = Country),
+             hjust = 0,
+             vjust = 0.5,
+             fill = NA,
+             label.size = NA,
+             family = &quot;Helvetica&quot;,
+             size = 6) +
+  
+  coord_flip(clip = &quot;off&quot;, expand = FALSE) +
+  scale_color_viridis_d(option = &quot;plasma&quot; ) +
+  scale_fill_viridis_d(option = &quot;plasma&quot;) +
+  scale_y_continuous(labels = format_si()) +
+  theme_minimal(14, &quot;Avenir&quot;) +
+  #facet_wrap( ~ Population.type) +
+  #facet_grid(. ~ Population.type) +
+  
+  ## get the animation per year... #, nframes = 250, fps = 10, end_pause = 20
+  transition_time(Year ) +
+  ease_aes(&#39;cubic-in-out&#39;) + 
+ # enter_fade() +
+ # exit_fade() +
+  #view_follow(fixed_y = TRUE) +
+  
+  guides(color = F, fill = F) +
+  labs(title =  &quot;Top 10 Hosting Countries, 1951 - 2017&quot;,
+       subtitle = &#39;Year {frame_time}&#39;,
+       y = &quot;Population Size&quot;,
+       x = &quot;&quot;,
+       caption =  &quot;Source: UNHCR Population Statistics -http://popstats.unhcr.org &quot;) +
+  theme(plot.title = element_text(hjust = 1, size = 22),
+        axis.ticks.y = element_blank(),
+        axis.text.y  = element_blank(), 
+        panel.background  = element_blank(), 
+        panel.grid = element_blank(),
+        plot.background = element_blank(),
+        legend.position = &quot;bottom&quot;,
+        panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+        panel.grid.major.y = element_blank()) 
+
+#animate(p, nframes = 250, fps = 4, end_pause = 20, width = 600)
+animate(p, fps = 1, nframes = 250, end_pause = 20, width = 600)</code></pre>
+<p><img src="/post/refugee-bar-chart-race_files/figure-html/barchartrace%20-1.gif" /><!-- --></p>
+<pre class="r"><code>anim_save(&quot;bar_chart_race_refugee.gif&quot;, animate(p, fps = 1, nframes = 250, end_pause = 20, width = 600))</code></pre>
+<p>the same bar chart race but for IDPs..</p>
+<pre class="r"><code>p &lt;- ggplot(rank_data2[rank_data2$Population.type %in% c(&quot;Internally displaced persons&quot;), ]) +
+  geom_bar(aes(y = Value2,  x =   reorder(ordering, desc(ordering)),
+               group = Country ,color = Country, fill = Country), alpha = 0.75, stat = &quot;identity&quot;) +
+  
+  geom_label(aes(y = 0 , x =  reorder(ordering, desc(ordering)), label = Country),
+             hjust = 0,
+             vjust = 0.5,
+             fill = NA,
+             label.size = NA,
+             family = &quot;Helvetica&quot;,
+             size = 6) +
+  
+  coord_flip(clip = &quot;off&quot;, expand = FALSE) +
+  scale_color_viridis_d(option = &quot;plasma&quot; ) +
+  scale_fill_viridis_d(option = &quot;plasma&quot;) +
+  scale_y_continuous(labels = format_si()) +
+  theme_minimal(14, &quot;Avenir&quot;) +
+  #facet_wrap( ~ Population.type) +
+  #facet_grid(. ~ Population.type) +
+  
+  ## get the animation per year... #, nframes = 250, fps = 10, end_pause = 20
+  transition_time(Year ) +
+  ease_aes(&#39;cubic-in-out&#39;) + 
+ # enter_fade() +
+ # exit_fade() +
+  #view_follow(fixed_y = TRUE) +
+  
+  guides(color = F, fill = F) +
+  labs(title =  &quot;Top 10 IDPs Countries, 1993 - 2017&quot;,
+       subtitle = &#39;Year {frame_time}&#39;,
+       y = &quot;Population Size&quot;,
+       x = &quot;&quot;,
+       caption =  &quot;Source: UNHCR Population Statistics -http://popstats.unhcr.org &quot;) +
+  theme(plot.title = element_text(hjust = 1, size = 22),
+        axis.ticks.y = element_blank(),
+        axis.text.y  = element_blank(), 
+        panel.background  = element_blank(), 
+        panel.grid = element_blank(),
+        plot.background = element_blank(),
+        legend.position = &quot;bottom&quot;,
+        panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+        panel.grid.major.y = element_blank()) 
+
+#animate(p, nframes = 250, fps = 4, end_pause = 20, width = 600)
+animate(p, fps = 1, nframes = 250, end_pause = 20, width = 600)</code></pre>
+<p><img src="/post/refugee-bar-chart-race_files/figure-html/barchartrace2%20-1.gif" /><!-- --></p>
+<pre class="r"><code>anim_save(&quot;bar_chart_race_idp.gif&quot;, animate(p, fps = 1, nframes = 250, end_pause = 20, width = 600))</code></pre>

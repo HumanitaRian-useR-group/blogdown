@@ -1,0 +1,1343 @@
+---
+title: "Estimation of sectoral priorities: Borda Count & Plackett-Luce model"
+author: "Benini & Sons"
+date: "2019-12-03"
+categories:
+  - Indicator
+  - Prioritisation
+tags:
+  - Okular-Analytics
+  - Benini
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<p>Ratings and rankings account for the majority of data generated in the course of rapid key informant needs assessments during humanitarian emergencies. Using this information to develop consolidated need prioritisation comes with challenges.
+<!--MORE--></p>
+<p>Practically speaking, the method presented here can be used for dataset that includes question such as</p>
+<blockquote>
+<p>what’s your first need? <em>(select_one among different options)</em></p>
+</blockquote>
+<blockquote>
+<p>what’s your second need? <em>(select_one among different options)</em></p>
+</blockquote>
+<blockquote>
+<p>what’s your third need? <em>(select_one among different options)</em></p>
+</blockquote>
+<p>This tutorial is based on the publication <a href="http://aldo-benini.org/Level2/HumanitData/OkularAnalytics_Priorities_and_Preferences_v2019_01_23.pdf">Priorities and preferences in humanitarian needs assessments -Their measurement by rating and ranking methods</a>. Humanitarian needs assessments seek to establish priorities for action and preferences of those whom the action will affect. Assessment teams collect data meant to capture the severity of problems and the situational aspects that matter in the evaluation of response options. Needs assessments establish priorities whereas <strong>response plans seek viable compromises between priorities</strong> and the means to address them.</p>
+<p>When samples of stakeholders, such as key informants or relief workers, state priorities or preferences, the information chiefly produces <strong>ratings or rankings</strong> and such data are ordinal. In summarizing them, we need to avoid operations that require metric variables (such as the arithmetic mean) wich does not account for compensability; yet we will seek methods that produce aggregates with metric qualities (such as Borda counts) as these have a higher information value and offer greater flexibility for subsequent prioritisation analyses.</p>
+<p>When aggregating rating and ranking data and about the interpretation of the resulting measures of priority and preference, two distinctions are fundamental:</p>
+<ul>
+<li><p>The first concerns <strong>statistical independence</strong>: Ratings (such as of the severity of unmet needs invarious sectors), though cognitively interdependent among items, statistically are independent. Rankings reflect an order among items and are dependent in both respects.For the analysis, both types have pros and cons; they contribute the most when used in tandem. This can happen during data collection – by asking both rating and ranking questions – and/or in the analysis – such as by ranking aggregate measures from ratings.</p></li>
+<li><p>Second, certain measures characterize <strong>cases</strong> (units like geographical areas, communities,camps, eventually households and individuals), while others express <strong>relationships with items</strong> (formally: options, aspects, attributes, indicators; substantively: sectors, agencies,problems, etc.). Methods suitable to compare Case A vs. Case B as well as Item X vs. Y are few; most of those based on ordinal data work only in one or the other way, not both.</p></li>
+</ul>
+<div id="problem-statement" class="section level2">
+<h2>Problem statement</h2>
+<p>Borda implicitly makesseveral strong assumptions. Respondents are aware that they exercise voting</p>
+<p>The Plackett-Luce model of rankings overcomes analysis barrier linked to the analysis of ranked preferences and priorities:</p>
+<ul>
+<li><p>It produces a true ratio-level measure of the strength of preferences from full or partial choices.</p></li>
+<li><p>It tests for differences between items follow from confidence intervals; so that such difference can be extended for groups within a given item.</p></li>
+</ul>
+<p>The Plackett-Luce model supplies a stronger measure. It is ratio level. Moreover, it is basedon more intuitive behavioral assumptions than the Borda count.</p>
+<p>In this tutorial, we will present code to implement quickly those 2 methods.</p>
+</div>
+<div id="loading-packages-function" class="section level2">
+<h2>Loading packages &amp; Function</h2>
+<pre class="r"><code>## This function will retrieve the packae if they are not yet installed.
+using &lt;- function(...) {
+    libs &lt;- unlist(list(...))
+    req &lt;- unlist(lapply(libs,require,character.only = TRUE))
+    need &lt;- libs[req == FALSE]
+    if (length(need) &gt; 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+## Getting all necessary package
+using(&quot;foreign&quot;, &quot;PlackettLuce&quot;, &quot;tidyverse&quot;, &quot;qvcalc&quot;,&quot;kableExtra&quot;,&quot;stargazer&quot;,&quot;NLP&quot;,
+                     &quot;ggthemes&quot;, &quot;ggrepel&quot;, &quot;GGally&quot;, &quot;bbplot&quot;,&quot;ggpubr&quot;)
+
+rm(using)
+
+# This small function is used to have nicely left align text within charts produced with ggplot2
+left_align &lt;- function(plot_name, pieces){
+  grob &lt;- ggplot2::ggplotGrob(plot_name)
+  n &lt;- length(pieces)
+  grob$layout$l[grob$layout$name %in% pieces] &lt;- 2
+  return(grob)
+}
+
+## Fonction to calculate borda count
+AvgRank &lt;- function(BallotMatrix){
+    Ballots &lt;- as.matrix(BallotMatrix[, -1], mode = &quot;numeric&quot;)
+    Num_Candidates &lt;- dim(Ballots)[1]
+    Names &lt;- BallotMatrix[, 1]
+    Ballots[is.na(Ballots)] &lt;- Num_Candidates + 1 #Treat blanks as one worse than min
+    MeanRanks &lt;- rowMeans(Ballots)
+    Rankings &lt;- data.frame(Names, MeanRanks)
+    Rankings &lt;- Rankings[order(rank(Rankings[, 2], ties.method = &quot;random&quot;)), ] #Ties handled through random draw
+    Rankings &lt;- data.frame(Rankings, seq_along(Rankings[, 1]))
+    names(Rankings) &lt;- c(&quot;Items&quot;, &quot;Average Rank&quot;, &quot;Position&quot;)
+    return(Rankings)  
+}</code></pre>
+</div>
+<div id="dataset" class="section level2">
+<h2>Dataset</h2>
+<p>The data used in the this tutorial comes from NPM Site Assessment Round 11, 2018 - for the Rohingya refugee camps in Bangladesh.</p>
+<pre class="r"><code>data_csv &lt;- read.csv(file = &quot;181227_2027AB_NPM11_Priorities_PlackettLuce.csv&quot;, header = T, sep = &quot;,&quot;)
+
+# Structure of the data:
+#str(data_csv)</code></pre>
+<p>When loaded in R, all non-numeric data columns are read as factors when loading csv because of argument <code>default.stringsAsFactors()</code>.</p>
+<p>The model-fitting function in PlackettLuce, requires data in the form of rankings, with the rank (1st, 2nd, 3rd, …) for each item. Therefore transformation is required for the data in their orginal stage as we can see below.</p>
+<pre class="r"><code>used_var &lt;- as.character(names(data_csv))[grepl(&quot;l_&quot;,as.character(names(data_csv)))]
+ 
+ kable( data_csv[1:10 , c(&quot;block_id&quot;,&quot;population&quot;,&quot;priority1&quot;,&quot;priority3&quot;,&quot;priority3&quot;) ], 
+       caption = &quot;Data Overview&quot;) %&gt;%
+        kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
+<table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-2">Table 1: </span>Data Overview
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+block_id
+</th>
+<th style="text-align:right;">
+population
+</th>
+<th style="text-align:left;">
+priority1
+</th>
+<th style="text-align:left;">
+priority3
+</th>
+<th style="text-align:left;">
+priority3.1
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CXB-001-001
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:left;">
+Food assistance
+</td>
+<td style="text-align:left;">
+Job opportunities
+</td>
+<td style="text-align:left;">
+Job opportunities
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-005-001
+</td>
+<td style="text-align:right;">
+129
+</td>
+<td style="text-align:left;">
+Cooking fuel and firewood
+</td>
+<td style="text-align:left;">
+Education for children
+</td>
+<td style="text-align:left;">
+Education for children
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-006-001
+</td>
+<td style="text-align:right;">
+221
+</td>
+<td style="text-align:left;">
+Food assistance
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-007-001
+</td>
+<td style="text-align:right;">
+130
+</td>
+<td style="text-align:left;">
+Food assistance
+</td>
+<td style="text-align:left;">
+Education for children
+</td>
+<td style="text-align:left;">
+Education for children
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-008-001
+</td>
+<td style="text-align:right;">
+112
+</td>
+<td style="text-align:left;">
+Food assistance
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-009-001
+</td>
+<td style="text-align:right;">
+54
+</td>
+<td style="text-align:left;">
+Cooking fuel and firewood
+</td>
+<td style="text-align:left;">
+Shelter
+</td>
+<td style="text-align:left;">
+Shelter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-010-001
+</td>
+<td style="text-align:right;">
+230
+</td>
+<td style="text-align:left;">
+Food assistance
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-013-001
+</td>
+<td style="text-align:right;">
+106
+</td>
+<td style="text-align:left;">
+Food assistance
+</td>
+<td style="text-align:left;">
+Sanitation
+</td>
+<td style="text-align:left;">
+Sanitation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-014-001
+</td>
+<td style="text-align:right;">
+570
+</td>
+<td style="text-align:left;">
+Cooking fuel and firewood
+</td>
+<td style="text-align:left;">
+Job opportunities
+</td>
+<td style="text-align:left;">
+Job opportunities
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CXB-016-001
+</td>
+<td style="text-align:right;">
+67
+</td>
+<td style="text-align:left;">
+Sanitation
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+<td style="text-align:left;">
+Healthcare
+</td>
+</tr>
+</tbody>
+</table>
+<p>The analysis will provide estimates for priorities among <strong>10 areas of need</strong> extracted from those 3 variables. Arguments to be used the Plackett-Luce model have been prefixed “l_” so that they can retrieved automatically.</p>
+</div>
+<div id="borda-count" class="section level2">
+<h2>Borda Count</h2>
+<pre class="r"><code>## transpose the data
+
+vote &lt;- t(data_csv[ , c(used_var)])
+
+borda &lt;- AvgRank(vote)
+
+borda$Items &lt;- row.names(borda)
+row.names(borda) &lt;- NULL
+
+kable( borda, 
+       caption = &quot;Borda Count per sector&quot;) %&gt;%
+        kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
+<table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-3">Table 2: </span>Borda Count per sector
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Items
+</th>
+<th style="text-align:right;">
+Average Rank
+</th>
+<th style="text-align:right;">
+Position
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+l_nfis
+</td>
+<td style="text-align:right;">
+0.2398190
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_healthcare
+</td>
+<td style="text-align:right;">
+0.2584213
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_safety
+</td>
+<td style="text-align:right;">
+0.2845651
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_education
+</td>
+<td style="text-align:right;">
+0.2890900
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_sanitation
+</td>
+<td style="text-align:right;">
+0.3076923
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_shelter
+</td>
+<td style="text-align:right;">
+0.4529915
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_food
+</td>
+<td style="text-align:right;">
+0.6158874
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_jobs
+</td>
+<td style="text-align:right;">
+0.7616893
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_water
+</td>
+<td style="text-align:right;">
+0.9381599
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_fuel
+</td>
+<td style="text-align:right;">
+1.7073906
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="plackett-luce-model" class="section level2">
+<h2>Plackett-Luce Model</h2>
+<div id="generate-the-model" class="section level3">
+<h3>Generate the model</h3>
+<p>In the needs assessment context, we call the Plackett-Luce-“worth” coefficients “Intensities”; this terminology is arbitrary. Error messages below will apppear but are specific of this dataset and can be ignored.</p>
+<pre class="r"><code>data_csv %&gt;%
+  dplyr::select(starts_with(&quot;l_&quot;)) %&gt;%
+  PlackettLuce() -&gt; intensities</code></pre>
+<pre><code>## Recoded rankings that are not in dense form</code></pre>
+<pre><code>## Rankings with only 1 item set to `NA`</code></pre>
+<pre class="r"><code>#names(intensities)
+# Summary of intensities:
+# &quot;ref = NULL&quot; sets the mean of all intensities as the reference value.
+# Else the first item would be the reference, with its coefficent constrained to 0.
+
+Plackett_Luce_est &lt;- summary(intensities, ref = NULL)
+
+Plackett_Luce_est</code></pre>
+<pre><code>## Call: PlackettLuce(rankings = .)
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## l_fuel        0.40822    0.04211   9.694  &lt; 2e-16 ***
+## l_education  -0.05125    0.09615  -0.533   0.5940    
+## l_food        1.45591    0.06502  22.393  &lt; 2e-16 ***
+## l_healthcare -0.50588    0.11155  -4.535 5.76e-06 ***
+## l_jobs       -0.74085    0.07239 -10.235  &lt; 2e-16 ***
+## l_nfis       -0.75151    0.12079  -6.221 4.93e-10 ***
+## l_safety     -0.75632    0.11546  -6.550 5.74e-11 ***
+## l_sanitation -0.17088    0.09585  -1.783   0.0746 .  
+## l_shelter     0.06927    0.07656   0.905   0.3656    
+## l_water       1.04329    0.05337  19.550  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual deviance:  5912.8 on 5729 degrees of freedom
+## AIC:  5930.8 
+## Number of iterations: 17</code></pre>
+</div>
+<div id="preparations-for-confidence-intervals" class="section level3">
+<h3>Preparations for confidence intervals</h3>
+<p>First, we prepare a table for export, stripping the prefix “l_”. We ensure items will be listed in the sequence of the arguments, not alphabetically.</p>
+<pre class="r"><code>Plackett_Luce_est$coefficients %&gt;%
+  gsub(pattern     = &quot;l_&quot;,
+       replacement = &quot;&quot;,
+       x           = row.names(.)) %&gt;%
+  factor(x = ., levels = .) -&gt; items
+data.frame(items_num = as.integer(items),
+           items     = items,
+           Plackett_Luce_est$coefficients) -&gt; Plackett_Luce_est_z.values
+
+kable(Plackett_Luce_est_z.values, caption = &quot;Model estimation&quot;) %&gt;%
+           kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
+<table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-5">Table 3: </span>Model estimation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+items_num
+</th>
+<th style="text-align:left;">
+items
+</th>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std..Error
+</th>
+<th style="text-align:right;">
+z.value
+</th>
+<th style="text-align:right;">
+Pr…z..
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+l_fuel
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+fuel
+</td>
+<td style="text-align:right;">
+0.4082170
+</td>
+<td style="text-align:right;">
+0.0421095
+</td>
+<td style="text-align:right;">
+9.6941844
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_education
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+education
+</td>
+<td style="text-align:right;">
+-0.0512509
+</td>
+<td style="text-align:right;">
+0.0961501
+</td>
+<td style="text-align:right;">
+-0.5330300
+</td>
+<td style="text-align:right;">
+0.5940128
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_food
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+food
+</td>
+<td style="text-align:right;">
+1.4559099
+</td>
+<td style="text-align:right;">
+0.0650167
+</td>
+<td style="text-align:right;">
+22.3928506
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_healthcare
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+healthcare
+</td>
+<td style="text-align:right;">
+-0.5058790
+</td>
+<td style="text-align:right;">
+0.1115519
+</td>
+<td style="text-align:right;">
+-4.5349226
+</td>
+<td style="text-align:right;">
+0.0000058
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_jobs
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:left;">
+jobs
+</td>
+<td style="text-align:right;">
+-0.7408503
+</td>
+<td style="text-align:right;">
+0.0723857
+</td>
+<td style="text-align:right;">
+-10.2347628
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_nfis
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+nfis
+</td>
+<td style="text-align:right;">
+-0.7515089
+</td>
+<td style="text-align:right;">
+0.1207942
+</td>
+<td style="text-align:right;">
+-6.2213973
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_safety
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:left;">
+safety
+</td>
+<td style="text-align:right;">
+-0.7563186
+</td>
+<td style="text-align:right;">
+0.1154639
+</td>
+<td style="text-align:right;">
+-6.5502617
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_sanitation
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:left;">
+sanitation
+</td>
+<td style="text-align:right;">
+-0.1708777
+</td>
+<td style="text-align:right;">
+0.0958493
+</td>
+<td style="text-align:right;">
+-1.7827746
+</td>
+<td style="text-align:right;">
+0.0746230
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_shelter
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:left;">
+shelter
+</td>
+<td style="text-align:right;">
+0.0692724
+</td>
+<td style="text-align:right;">
+0.0765627
+</td>
+<td style="text-align:right;">
+0.9047796
+</td>
+<td style="text-align:right;">
+0.3655822
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+l_water
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+water
+</td>
+<td style="text-align:right;">
+1.0432861
+</td>
+<td style="text-align:right;">
+0.0533651
+</td>
+<td style="text-align:right;">
+19.5499757
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># ========================================================================
+# Export output: if needed
+# ------------------------------------------------------------------------
+# write.csv(x         = Plackett_Luce_est_z.values,
+#           file      = paste0(path.output, &quot;/&quot;, &quot;Plackett_Luce_coef_table.csv&quot;),
+#           row.names = F)</code></pre>
+<p>In order to obtain confidence intervals, quasi-variances of the coefficients are needed:</p>
+<pre class="r"><code>qv &lt;- qvcalc(intensities, ref = NULL)
+summary(qv)</code></pre>
+<pre><code>## Model call:  PlackettLuce(rankings = .) 
+##                     estimate         SE    quasiSE    quasiVar
+##     l_fuel        0.40821699 0.04210947 0.03288481 0.001081411
+##     l_education  -0.05125089 0.09615010 0.10275089 0.010557745
+##     l_food        1.45590988 0.06501673 0.06142255 0.003772729
+##     l_healthcare -0.50587901 0.11155185 0.12108662 0.014661971
+##     l_jobs       -0.74085027 0.07238568 0.07490996 0.005611502
+##     l_nfis       -0.75150887 0.12079423 0.13156000 0.017308034
+##     l_safety     -0.75631864 0.11546388 0.12518339 0.015670881
+##     l_sanitation -0.17087771 0.09584931 0.10267997 0.010543176
+##     l_shelter     0.06927241 0.07656274 0.07906022 0.006250518
+##     l_water       1.04328611 0.05336508 0.04693406 0.002202806
+## Worst relative errors in SEs of simple contrasts (%):  -2.9 6.4 
+## Worst relative errors over *all* contrasts (%):  -11.3 7.8</code></pre>
+<pre class="r"><code>#plot(qv, xlab = &quot;Needs Priorities&quot;, ylab = &quot;Worth (log)&quot;, main = NULL)</code></pre>
+<p>We strips prefix “l_” in preparation for export and ensure that items will be listed in the sequence of the arguments, not alphabetically.</p>
+<pre class="r"><code>qv$qvframe %&gt;%
+  gsub(pattern     = &quot;l_&quot;,
+       replacement = &quot;&quot;,
+       x           = row.names(.)) %&gt;%
+  factor(x = ., levels = .) -&gt; items</code></pre>
+<p>Now we computes additional columns needed for 95%-CIs and exponentiate coefficent and CI bound estimates, in accordance with Plackett-Luce Model.</p>
+<pre class="r"><code>qv$qvframe %&gt;% # qv table ...
+  data.frame(items_num = as.integer(items),
+             items     = items,
+             .) %&gt;%
+  mutate(quasiSD  = sqrt(quasiVar),
+         quasiLCI = estimate - quasiSD * qnorm(0.975, 0, 1),
+         quasiUCI = estimate + quasiSD * qnorm(0.975, 0, 1),
+         expLCI   = exp(quasiLCI),
+         expEst   = exp(estimate),
+         expUCI   = exp(quasiUCI)) -&gt; qv_estim_CI
+
+## Sort based on preference level
+qv_estim_CI &lt;- qv_estim_CI[ order(-  qv_estim_CI$expEst), ]
+qv_estim_CI$items &lt;- reorder(qv_estim_CI$items, qv_estim_CI$expEst)
+
+
+kable(qv_estim_CI, caption = &quot;Model Confidence Interval&quot;) %&gt;%
+           kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
+<table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-8">Table 4: </span>Model Confidence Interval
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+items_num
+</th>
+<th style="text-align:left;">
+items
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+SE
+</th>
+<th style="text-align:right;">
+quasiSE
+</th>
+<th style="text-align:right;">
+quasiVar
+</th>
+<th style="text-align:right;">
+quasiSD
+</th>
+<th style="text-align:right;">
+quasiLCI
+</th>
+<th style="text-align:right;">
+quasiUCI
+</th>
+<th style="text-align:right;">
+expLCI
+</th>
+<th style="text-align:right;">
+expEst
+</th>
+<th style="text-align:right;">
+expUCI
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+food
+</td>
+<td style="text-align:right;">
+1.4559099
+</td>
+<td style="text-align:right;">
+0.0650167
+</td>
+<td style="text-align:right;">
+0.0614225
+</td>
+<td style="text-align:right;">
+0.0037727
+</td>
+<td style="text-align:right;">
+0.0614225
+</td>
+<td style="text-align:right;">
+1.3355239
+</td>
+<td style="text-align:right;">
+1.5762959
+</td>
+<td style="text-align:right;">
+3.8019873
+</td>
+<td style="text-align:right;">
+4.2883836
+</td>
+<td style="text-align:right;">
+4.8370056
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+water
+</td>
+<td style="text-align:right;">
+1.0432861
+</td>
+<td style="text-align:right;">
+0.0533651
+</td>
+<td style="text-align:right;">
+0.0469341
+</td>
+<td style="text-align:right;">
+0.0022028
+</td>
+<td style="text-align:right;">
+0.0469341
+</td>
+<td style="text-align:right;">
+0.9512970
+</td>
+<td style="text-align:right;">
+1.1352752
+</td>
+<td style="text-align:right;">
+2.5890656
+</td>
+<td style="text-align:right;">
+2.8385294
+</td>
+<td style="text-align:right;">
+3.1120298
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+fuel
+</td>
+<td style="text-align:right;">
+0.4082170
+</td>
+<td style="text-align:right;">
+0.0421095
+</td>
+<td style="text-align:right;">
+0.0328848
+</td>
+<td style="text-align:right;">
+0.0010814
+</td>
+<td style="text-align:right;">
+0.0328848
+</td>
+<td style="text-align:right;">
+0.3437639
+</td>
+<td style="text-align:right;">
+0.4726700
+</td>
+<td style="text-align:right;">
+1.4102457
+</td>
+<td style="text-align:right;">
+1.5041335
+</td>
+<td style="text-align:right;">
+1.6042719
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+9
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:left;">
+shelter
+</td>
+<td style="text-align:right;">
+0.0692724
+</td>
+<td style="text-align:right;">
+0.0765627
+</td>
+<td style="text-align:right;">
+0.0790602
+</td>
+<td style="text-align:right;">
+0.0062505
+</td>
+<td style="text-align:right;">
+0.0790602
+</td>
+<td style="text-align:right;">
+-0.0856828
+</td>
+<td style="text-align:right;">
+0.2242276
+</td>
+<td style="text-align:right;">
+0.9178854
+</td>
+<td style="text-align:right;">
+1.0717281
+</td>
+<td style="text-align:right;">
+1.2513558
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:left;">
+education
+</td>
+<td style="text-align:right;">
+-0.0512509
+</td>
+<td style="text-align:right;">
+0.0961501
+</td>
+<td style="text-align:right;">
+0.1027509
+</td>
+<td style="text-align:right;">
+0.0105577
+</td>
+<td style="text-align:right;">
+0.1027509
+</td>
+<td style="text-align:right;">
+-0.2526389
+</td>
+<td style="text-align:right;">
+0.1501372
+</td>
+<td style="text-align:right;">
+0.7767483
+</td>
+<td style="text-align:right;">
+0.9500403
+</td>
+<td style="text-align:right;">
+1.1619936
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:left;">
+sanitation
+</td>
+<td style="text-align:right;">
+-0.1708777
+</td>
+<td style="text-align:right;">
+0.0958493
+</td>
+<td style="text-align:right;">
+0.1026800
+</td>
+<td style="text-align:right;">
+0.0105432
+</td>
+<td style="text-align:right;">
+0.1026800
+</td>
+<td style="text-align:right;">
+-0.3721268
+</td>
+<td style="text-align:right;">
+0.0303713
+</td>
+<td style="text-align:right;">
+0.6892669
+</td>
+<td style="text-align:right;">
+0.8429246
+</td>
+<td style="text-align:right;">
+1.0308372
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+healthcare
+</td>
+<td style="text-align:right;">
+-0.5058790
+</td>
+<td style="text-align:right;">
+0.1115519
+</td>
+<td style="text-align:right;">
+0.1210866
+</td>
+<td style="text-align:right;">
+0.0146620
+</td>
+<td style="text-align:right;">
+0.1210866
+</td>
+<td style="text-align:right;">
+-0.7432044
+</td>
+<td style="text-align:right;">
+-0.2685536
+</td>
+<td style="text-align:right;">
+0.4755875
+</td>
+<td style="text-align:right;">
+0.6029753
+</td>
+<td style="text-align:right;">
+0.7644845
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:left;">
+jobs
+</td>
+<td style="text-align:right;">
+-0.7408503
+</td>
+<td style="text-align:right;">
+0.0723857
+</td>
+<td style="text-align:right;">
+0.0749100
+</td>
+<td style="text-align:right;">
+0.0056115
+</td>
+<td style="text-align:right;">
+0.0749100
+</td>
+<td style="text-align:right;">
+-0.8876711
+</td>
+<td style="text-align:right;">
+-0.5940294
+</td>
+<td style="text-align:right;">
+0.4116132
+</td>
+<td style="text-align:right;">
+0.4767084
+</td>
+<td style="text-align:right;">
+0.5520982
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+nfis
+</td>
+<td style="text-align:right;">
+-0.7515089
+</td>
+<td style="text-align:right;">
+0.1207942
+</td>
+<td style="text-align:right;">
+0.1315600
+</td>
+<td style="text-align:right;">
+0.0173080
+</td>
+<td style="text-align:right;">
+0.1315600
+</td>
+<td style="text-align:right;">
+-1.0093617
+</td>
+<td style="text-align:right;">
+-0.4936560
+</td>
+<td style="text-align:right;">
+0.3644515
+</td>
+<td style="text-align:right;">
+0.4716544
+</td>
+<td style="text-align:right;">
+0.6103907
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:left;">
+safety
+</td>
+<td style="text-align:right;">
+-0.7563186
+</td>
+<td style="text-align:right;">
+0.1154639
+</td>
+<td style="text-align:right;">
+0.1251834
+</td>
+<td style="text-align:right;">
+0.0156709
+</td>
+<td style="text-align:right;">
+0.1251834
+</td>
+<td style="text-align:right;">
+-1.0016736
+</td>
+<td style="text-align:right;">
+-0.5109637
+</td>
+<td style="text-align:right;">
+0.3672643
+</td>
+<td style="text-align:right;">
+0.4693912
+</td>
+<td style="text-align:right;">
+0.5999172
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>#str(qv_estim_CI)
+# ========================================================================
+# Export output:
+# ------------------------------------------------------------------------
+# write.csv(x         = qv_estim_CI,
+#           file      = paste0(path.output, &quot;/&quot;, &quot;Plackett_Luce_estimates_CI.csv&quot;),
+#           row.names = F)</code></pre>
+</div>
+<div id="visualise-results" class="section level3">
+<h3>Visualise Results</h3>
+<p>In order to visualise the results together with the confidence interval, the best type visual is called a <em>Forest plot</em>.</p>
+<p>There’s a default plot in <a href="https://hturner.github.io/PlackettLuce/">PlackettLuce package</a> but we can also use ggplot2.</p>
+<pre class="r"><code>plot1 &lt;- ggplot(data = qv_estim_CI, 
+             aes( x = items, 
+                  y = expEst, 
+                  ymin = expLCI,
+                  ymax = expUCI)) +
+      # geom_pointrange(color = &quot;purple&quot;, shape = 18,  size = 2) + 
+  
+        geom_point(color = &quot;purple&quot;, shape = 18,  size = 5) + 
+        geom_errorbar(aes(xmax = expLCI, xmin = expLCI), height = 1, color = &quot;black&quot;, width = 0.2, size = 1) +
+  
+        #geom_hline(yintercept = 1, lty = 2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab(&quot;Preference Level&quot;) +
+        ylab(&quot;&quot;) +
+        labs(title = &quot; At first: Food, Water &amp; Fuel!&quot;,
+                 subtitle =  &quot;Sectorial Preference, analysis based on Plackett-Luce model&quot;,
+                 caption = &quot;The black lines (also called &#39;whiskers&#39;) around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)&quot;,
+                 x = NULL, y = NULL) +
+          bbc_style() +
+            theme( plot.title = element_text(size = 14),
+                   plot.subtitle = element_text(size = 12),
+                   plot.caption = element_text(size = 7, hjust = 1),
+                  axis.text = element_text(size = 9),
+                  panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+                  panel.grid.major.y = element_blank(),
+                  strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &quot;caption&quot;)), ncol = 1, nrow = 1)</code></pre>
+<p><img src="/post/Plackett-Luce_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+</div>
+</div>
+<div id="compare-borda-count-plackett-luce-model" class="section level2">
+<h2>Compare Borda Count &amp; Plackett-Luce Model</h2>
+<p>Plackett-Luce does not score observed ranks mechanically, as Borda does. Rather, it considers the tendency for items to be at the higher end of the observed ranks and then extrapolates that information into simulated rankings of the unobserved ranks.</p>
+<p>The Borda count is indifferent to the unobserved rank orders. It is uninformative in this regard.</p>
+<p>We can compare the 2 method with the chart below:</p>
+<pre class="r"><code>plot1 &lt;- ggplot(data = qv_estim_CI, 
+             aes( x = items, 
+                  y = expEst, 
+                  ymin = expLCI,
+                  ymax = expUCI)) +
+      # geom_pointrange(color = &quot;purple&quot;, shape = 18,  size = 2) + 
+  
+        geom_point(color = &quot;purple&quot;, shape = 18,  size = 5) + 
+        geom_errorbar(aes(xmax = expLCI, xmin = expLCI), height = 1, color = &quot;black&quot;, width = 0.2, size = 1) +
+  
+        #geom_hline(yintercept = 1, lty = 2) +  # add a dotted line at x=1 after flip
+        coord_flip() +  # flip coordinates (puts labels on y axis)
+        xlab(&quot;Preference Level&quot;) +
+        ylab(&quot;&quot;) +
+        labs(title = &quot; At first: Food, Water &amp; Fuel!&quot;,
+                 subtitle =  &quot;Sectorial Preference, analysis based on Plackett-Luce model&quot;,
+                 caption = &quot;The black lines (also called &#39;whiskers&#39;) around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)&quot;,
+                 x = NULL, y = NULL) +
+          bbc_style() +
+            theme( plot.title = element_text(size = 14),
+                   plot.subtitle = element_text(size = 12),
+                   plot.caption = element_text(size = 7, hjust = 1),
+                  axis.text = element_text(size = 9),
+                  panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+                  panel.grid.major.y = element_blank(),
+                  strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &quot;caption&quot;)), ncol = 1, nrow = 1)</code></pre>
+<p><img src="/post/Plackett-Luce_files/figure-html/model1-1.png" width="960" /></p>
+</div>

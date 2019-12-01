@@ -1,12 +1,14 @@
 ---
 title: "Refugee Population Data Visualisation"
 author: "Edouard Legoupil"
-date: '2018-12-24'
+date: "2018-12-24"
 categories:
-  - Data
-tags:
+  - DataViz
   - Refugee
-  - WebData
+  - API
+tags:
+  - UNHCR
+  - Edouard-Legoupil
 ---
 
 UNHCR [Population Statistics Database](http://popstats.unhcr.org)  contains data about UNHCR's populations of concern from the year 1951 up to 2014 as well as their general composition by location of residence or origin, their status, their evolution over time.

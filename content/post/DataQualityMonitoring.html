@@ -1,0 +1,245 @@
+---
+title: "Data Quality Monitoring"
+author: "Bill Olander"
+date: "2019-06-18"
+categories:
+  - Quality
+tags:
+  - WFP
+  - Bill-Olander
+---
+
+
+
+<p>In this quick tutorial, I share a simple method to graphically display information to monitor data quality of survey teams using a little bit of dplyr and ggplot2
+<!--MORE--></p>
+<p>There is a lot to be said and done about data quality monitoring. Here is just one simple method to graphically observe “curb-stoning” or “flat-lining” - when enumerators stop administering/recording real questions and responses and instead start making up answers. Often fictious responses are not random and can sometimes be detected graphically.</p>
+<div id="installing-packages" class="section level2">
+<h2>Installing packages</h2>
+<p>To get started, if you don’t have them already, the following packages are necessary: readr dplyr ggplot2</p>
+<pre class="r"><code>## Getting all necessary package
+
+using &lt;- function(...) {
+    libs &lt;- unlist(list(...))
+    req &lt;- unlist(lapply(libs,require,character.only = TRUE))
+    need &lt;- libs[req == FALSE]
+    if (length(need) &gt; 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+
+using(&quot;readr&quot;,&quot;dplyr&quot;,&quot;ggplot2&quot;)</code></pre>
+<pre><code>## Loading required package: readr</code></pre>
+<pre><code>## Loading required package: dplyr</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+</div>
+<div id="downloading-data" class="section level2">
+<h2>Downloading data</h2>
+<p>Ideally, to monitor data quality, you’ll want to get the data as quickly and in way as automated as possible. One of the cool things about R is you can access data in all kinds of ways including grabbing it from APIs or urls (not included in this tutorial but worth checking out is the odkr package for getting data from open data kit setups).</p>
+<p>In this example, we’ll use readr to connect to a .csv file from a dropbox folder. Assuming we get a share link: <a href="https://www.dropbox.com/s/cypl442oxjiohgq/dataqualityexample.csv?dl=0" class="uri">https://www.dropbox.com/s/cypl442oxjiohgq/dataqualityexample.csv?dl=0</a> , it’s super easy to pull in the data.</p>
+<p>One important detail is we have to change the last part of the link from <code>?dl=0</code> to <code>?dl=1</code> ; read why on the <a href="https://help.dropbox.com/files-folders/share/force-download">Dropbox Force download page</a>.</p>
+<p>Anyway, let’s load the package readr and pull dataqualityexample.csv</p>
+<pre class="r"><code>library(readr)
+
+dataqualityexample &lt;- read_csv(&quot;https://www.dropbox.com/s/rnbykbfxeenrbqc/dataqualityexample.csv?dl=1&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   RspID = col_double(),
+##   InterviewerName = col_character(),
+##   FCSStap = col_double(),
+##   FCSPulse = col_double(),
+##   FCSDairy = col_double(),
+##   FCSPr = col_double(),
+##   FCSVeg = col_double(),
+##   FCSFruit = col_double(),
+##   FCSFat = col_double(),
+##   FCSSugar = col_double(),
+##   duration = col_double(),
+##   day = col_double()
+## )</code></pre>
+<p>next, let’s use glimpse to take a look at the data set</p>
+<pre class="r"><code>library(dplyr)
+
+glimpse(dataqualityexample)</code></pre>
+<pre><code>## Observations: 300
+## Variables: 12
+## $ RspID           &lt;dbl&gt; 5036892796, 85457240718, 21242646525, 30133725215, 78…
+## $ InterviewerName &lt;chr&gt; &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;…
+## $ FCSStap         &lt;dbl&gt; 6, 5, 6, 3, 4, 6, 5, 6, 7, 4, 7, 7, 6, 5, 6, 7, 6, 7,…
+## $ FCSPulse        &lt;dbl&gt; 2, 2, 5, 0, 0, 0, 3, 5, 2, 2, 6, 3, 1, 4, 5, 2, 4, 3,…
+## $ FCSDairy        &lt;dbl&gt; 7, 4, 0, 0, 0, 2, 0, 0, 0, 0, 7, 3, 0, 5, 0, 0, 0, 6,…
+## $ FCSPr           &lt;dbl&gt; 7, 3, 7, 0, 0, 4, 4, 1, 5, 7, 7, 7, 4, 3, 3, 4, 1, 4,…
+## $ FCSVeg          &lt;dbl&gt; 5, 4, 6, 2, 6, 6, 5, 5, 6, 3, 6, 4, 5, 4, 5, 6, 4, 3,…
+## $ FCSFruit        &lt;dbl&gt; 6, 0, 1, 3, 1, 2, 0, 0, 1, 0, 6, 3, 2, 6, 0, 3, 2, 1,…
+## $ FCSFat          &lt;dbl&gt; 7, 6, 7, 7, 6, 6, 5, 5, 7, 6, 7, 7, 5, 7, 6, 5, 7, 7,…
+## $ FCSSugar        &lt;dbl&gt; 7, 4, 0, 0, 0, 2, 0, 0, 2, 0, 7, 4, 0, 5, 0, 0, 2, 6,…
+## $ duration        &lt;dbl&gt; 1461, 719, 791, 875, 696, 796, 410, 1129, 736, 730, 5…
+## $ day             &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,…</code></pre>
+<p>In our sample database we have the following variables:</p>
+<table>
+<colgroup>
+<col width="19%" />
+<col width="80%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Variable</th>
+<th align="left">Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">RspID</td>
+<td align="left">anonymized unique identifier of the respondent</td>
+</tr>
+<tr class="even">
+<td align="left">InterviwerName</td>
+<td align="left">anonymized unique identifier of the enumerator</td>
+</tr>
+<tr class="odd">
+<td align="left">FCSStap</td>
+<td align="left">number of days staples were consumed in the last seven days</td>
+</tr>
+<tr class="even">
+<td align="left">FCSPulse</td>
+<td align="left">number of days pulses were consumed in the last seven days</td>
+</tr>
+<tr class="odd">
+<td align="left">FCSDairy</td>
+<td align="left">number of days dairy were consumed in the last seven days</td>
+</tr>
+<tr class="even">
+<td align="left">FCSPr</td>
+<td align="left">number of days protein were consumed in the last seven days</td>
+</tr>
+<tr class="odd">
+<td align="left">FCSVeg</td>
+<td align="left">number of days vegetable were consumed in the last seven days</td>
+</tr>
+<tr class="even">
+<td align="left">FCSFruit</td>
+<td align="left">number of days fruits were consumed in the last seven days</td>
+</tr>
+<tr class="odd">
+<td align="left">FCSFat</td>
+<td align="left">number of days fats/oils were consumed in the last seven days</td>
+</tr>
+<tr class="even">
+<td align="left">FCSSugar</td>
+<td align="left">number of days sugars were consumed in the last seven days</td>
+</tr>
+<tr class="odd">
+<td align="left">duration</td>
+<td align="left">completion time of the survey (in seconds - this is often the format in ODK surveys)</td>
+</tr>
+<tr class="even">
+<td align="left">day</td>
+<td align="left">day survey was completed</td>
+</tr>
+</tbody>
+</table>
+<div id="looking-at-the-food-consumption-score-by-interviewer" class="section level3">
+<h3>Looking at the Food Consumption Score by Interviewer</h3>
+<p>First, let’s use mutate to calculate the Food Consumption Score (<a href="https://resources.vam.wfp.org/node/13" class="uri">https://resources.vam.wfp.org/node/13</a>) for each interview :</p>
+<pre class="r"><code>dataqualityexample &lt;- dataqualityexample %&gt;%
+                      mutate(fcs = FCSStap * 2 + 
+                                   FCSPulse * 3 + 
+                                   FCSDairy  * 4 + 
+                                   FCSPr * 4 + 
+                                   FCSVeg + 
+                                   FCSFruit + 
+                                   FCSFat * .5 + 
+                                   FCSSugar * .5)</code></pre>
+<p>Now, we can use the ggplot2 package to visualize the frequency of Food Consumption Score entries by interviwer. We can get a sense of the frequency of FCS submissions from each interviewer by plotting each FCS submission by interviewer as a point.</p>
+<pre class="r"><code>library(ggplot2)
+
+dataqualityexample %&gt;% ggplot(aes(x = InterviewerName, y = fcs, color = InterviewerName)) +
+                       geom_point() </code></pre>
+<p><img src="/post/DataQualityMonitoring_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Here’s the cool trick, we can also <code>jitter</code> (or add a tiny bit of random noise to the points so they stand apart) the points a little bit to help us get a better sense of the frequency.</p>
+<pre class="r"><code>library(ggplot2)
+
+dataqualityexample %&gt;% ggplot(aes(x = InterviewerName, y = fcs, color = InterviewerName)) +
+                       geom_jitter() </code></pre>
+<p><img src="/post/DataQualityMonitoring_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Q: How many suspicious entries do you spot?</p>
+<p>A: Interviewer E’s submissions look suspicious. Let’s take a quick at some of their entries:</p>
+<pre class="r"><code>dataqualityexample %&gt;% filter(InterviewerName == &quot;E&quot;) %&gt;%
+                       glimpse()</code></pre>
+<pre><code>## Observations: 50
+## Variables: 13
+## $ RspID           &lt;dbl&gt; 24886070837, 90127115839, 21143007227, 84240231374, 8…
+## $ InterviewerName &lt;chr&gt; &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;, &quot;E&quot;…
+## $ FCSStap         &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSPulse        &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSDairy        &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSPr           &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSVeg          &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSFruit        &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSFat          &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ FCSSugar        &lt;dbl&gt; 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0, 7, 0,…
+## $ duration        &lt;dbl&gt; 357, 379, 235, 474, 319, 459, 201, 321, 448, 208, 420…
+## $ day             &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,…
+## $ fcs             &lt;dbl&gt; 112, 0, 112, 0, 112, 0, 112, 0, 112, 0, 112, 0, 112, …</code></pre>
+<p>It looks like Interviewer E is only entering 0s or 7s for the food group questions. This is highly suspect.</p>
+<p>But more subtly, it looks like Interviewer B has a little bit of clustering of digits. We can break apart the entries by day of survey with <code>facet_grid()</code></p>
+<pre class="r"><code>dataqualityexample %&gt;% ggplot(aes(x = InterviewerName, y = fcs, color = InterviewerName)) + 
+                       geom_jitter() +
+                       facet_grid( . ~ day) </code></pre>
+<p><img src="/post/DataQualityMonitoring_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>It looks like Interviewer B entered in all the same digits on day 5. Let’s take a glimpse of the data for Interviewer B for day 5, to confirm.</p>
+<pre class="r"><code>dataqualityexample %&gt;% filter(InterviewerName == &quot;B&quot; &amp; day == 5) %&gt;% 
+                       glimpse()</code></pre>
+<pre><code>## Observations: 10
+## Variables: 13
+## $ RspID           &lt;dbl&gt; 56489158342, 23193537084, 80555251173, 40014426998, 9…
+## $ InterviewerName &lt;chr&gt; &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;, &quot;B&quot;
+## $ FCSStap         &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSPulse        &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSDairy        &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSPr           &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSVeg          &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSFruit        &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSFat          &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ FCSSugar        &lt;dbl&gt; 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+## $ duration        &lt;dbl&gt; 287, 346, 381, 381, 369, 305, 205, 280, 244, 219
+## $ day             &lt;dbl&gt; 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+## $ fcs             &lt;dbl&gt; 64, 64, 64, 64, 64, 64, 64, 64, 64, 64</code></pre>
+<p>Yes, it seems that Interviewer B entered 4s for each of the food group questions on day 5.</p>
+</div>
+<div id="looking-at-the-duration-of-by-interviewer" class="section level3">
+<h3>Looking at the duration of by Interviewer</h3>
+<p>We can use the same method above to display the frequency of duration time of the survey by interviewer to give us addition.</p>
+<p>Let’s give it a shot.</p>
+<pre class="r"><code>dataqualityexample %&gt;% ggplot(aes(x = InterviewerName, y = duration, color = InterviewerName)) +  
+                       geom_jitter() +
+                       facet_grid( . ~ day) </code></pre>
+<p><img src="/post/DataQualityMonitoring_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>As is often the case, we have a few outliers distorting our picture. Let’s filter out the outliers and try again.</p>
+<pre class="r"><code>dataqualityexample %&gt;% filter(duration &lt; 25000) %&gt;%
+                        ggplot(aes(x = InterviewerName, y = duration, color = InterviewerName)) +
+                        geom_jitter() +
+                        facet_grid( . ~ day) </code></pre>
+<p><img src="/post/DataQualityMonitoring_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p>Here, we see that Interviewer E is completing surveys more quickly than others and Interviewer B started completing surveys much more quickly on day 5.</p>
+</div>
+<div id="so-what" class="section level3">
+<h3>So what?</h3>
+<p>Considering the entry patterns and submission times, it would be wise to call the supervisors of Interviewers B and E to observe their entries, investigate and take corrective action.
+Some thoughts</p>
+<p>A simple visualization could be presented to enumerators at the time of training and pilot data testing to give them the idea that their entries will be monitored and reviewed and not just sent to a black hole.</p>
+<p>Although based on real experiences, these examples are a bit facile. In reality, you might not see such clear “smoking guns”. Also, although this tutorial is worded very accusatorially be careful not to unduly accuse enumerators of cheating. A lot happens in the field and there could be many valid explanations for abnormal entries or a misunderstanding of questions or malfunctioning of the survey tool.</p>
+<p>It’s important to catch problems as early as you can so to take corrective action. As survey time goes on, so does fatigue, and as we saw with Interviewer B, it’s important to keep monitoring as the survey goes on. See <a href="http://blogs.worldbank.org/opendata/data-quality-research-what-if-we-re-watering-garden-while-house-fire?cid=SHR_BlogSiteShare_XX_EXT">Data quality in research: what if we’re watering the garden while the house is on fire?</a></p>
+<p>In Open Data Kit (ODK) or ODK-like programs, if the interviewer/supervisor open a form to review it, this changes the end time of the survey and creates a long duration time. You’ll often have outliers with very long surveys. Focus more on the short submission times rather than the longer ones.</p>
+</div>
+</div>

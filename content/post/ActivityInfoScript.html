@@ -1,0 +1,100 @@
+---
+title: "How-to: Access ActivityInfo data with R"
+date: "2019-10-03"
+author: "Mattia Zanazzi"
+categories:
+  - Indicator
+  - ActivityInfo
+tags:
+  - UNHCR
+  - Mattia-Zanazzi
+---
+
+
+
+<p>ActivityInfo is a data collection and management platform used in the humanitarian sector, designed particularly for Monitoring &amp; Evaluation. This short tutorial aims to explain how to access data using the ActivityInfo API with R.
+<!--MORE--></p>
+<p>ActivityInfo version used for this tutorial is <a href="https://v4.activityinfo.org/">V4.0</a>, focusing on the new interface <a href="http://help.activityinfo.org/m/quick_start_database_design/l/852495-classic-vs-new-interfaces">(forms, not activities)</a>.</p>
+<div id="the-activityinfo-r-package" class="section level2">
+<h2>The activityinfo-R package</h2>
+<p>“Be Data Driven”, the company managing ActivityInfo, has developed the <a href="https://github.com/bedatadriven/activityinfo-R">“activityinfo-R”</a> package. The package conveniently allows R users to read and write data through the ActivityInfo API.</p>
+<p>The package can be downloaded from GitHub:</p>
+<pre class="r"><code>install.packages(&quot;devtools&quot;)
+library(devtools)
+install_github(&quot;bedatadriven/activityinfo-R&quot;, ref = &quot;release&quot;)</code></pre>
+</div>
+<div id="basic-structure" class="section level2">
+<h2>Basic Structure</h2>
+<p>The new ActivityInfo interface uses forms with a look and feel similar to Kobo Toolbox. A database is comprised of forms, which are in turn made up of fields representing the type of data to be collected.</p>
+<p><img src="database.png" /></p>
+<p>(Source: <a href="http://help.activityinfo.org/m/quick_start_database_design/l/868870-databases">ActivityInfo</a>)</p>
+<p>Each database, form and field have a unique ID in ActivityInfo. The easiest way to obtain a form ID is by copying it from the URL of a form’s table, which follows the structure:
+<a href="https://v4.activityinfo.org/app#form/%7BformID%7D/table" class="uri">https://v4.activityinfo.org/app#form/{formID}/table</a></p>
+<p>A database ID is also available from the URL:
+<a href="https://v4.activityinfo.org/app#database/d%7BdatabaseID%7D" class="uri">https://v4.activityinfo.org/app#database/d{databaseID}</a>
+In previous versions, the URL looks like this:
+<a href="https://www.activityinfo.org/app#design/%7BdatabaseID%7D" class="uri">https://www.activityinfo.org/app#design/{databaseID}</a></p>
+<p>Field IDs, on the other hand, can be obtained by reading the JSON file of a form, or by downloading a form schema (see below):
+<a href="https://www.activityinfo.org/resources/form/%7BformID%7D/schema" class="uri">https://www.activityinfo.org/resources/form/{formID}/schema</a></p>
+</div>
+<div id="read-activityinfo-data" class="section level2">
+<h2>Read ActivityInfo data</h2>
+<p>Authentication information is needed to access form data. The activityinfo-R package makes this easy through the ActivityInfoLogin function:</p>
+<pre class="r"><code>library(activityinfo)
+activityInfoLogin(&quot;username&quot;, &quot;password&quot;)</code></pre>
+<p>This tutorial assumes that you already have a database set up for your organisation. If you have the necessary permissions, you can also create a database directly using the activityinfo-R package (see package Index).</p>
+<div id="accessing-all-form-data" class="section level3">
+<h3>Accessing all form data</h3>
+<p>Within your database, the function “getFormRecordTable” allows for the download of all form data in long format:</p>
+<pre class="r"><code>df &lt;- getFormRecordTable(form.id = &quot;FormID&quot;)</code></pre>
+<p>In the case of the national coordination platform in Peru (GTRM), we have a simple 3W form to upload partner data:
+<br>
+<br>
+<img src="AI_Peru_2.png" /></p>
+<p>To download this data, I can use the formID as shown above:</p>
+<pre class="r"><code>df &lt;- getFormRecordTable(form.id = &quot;a2145867380&quot;)</code></pre>
+</div>
+<div id="querying-within-a-single-form" class="section level3">
+<h3>Querying within a single form</h3>
+<p>Through the “queryTable” function, it is also possible to query within a form using field IDs. As mentioned above, you can see field IDs by looking at a form’s JSON schema. This can also be accessed directly in R using the “getFormSchema” function.</p>
+<pre class="r"><code>df &lt;- getFormSchema(&quot;a2145867380&quot;)</code></pre>
+<p>All IDs can be read directly in R:</p>
+<p><img src="AI_Peru_4.png" /></p>
+<p>You can then use the field IDs for queries within a form:</p>
+<pre class="r"><code>df &lt;- queryTable(&quot;formID&quot;, columns = c(col1= &quot;FieldID_1&quot;, col2=&quot;FieldID_2&quot;, ...))</code></pre>
+<p>It is relevant to note that a field can be called also through the Field code, if assigned (“Fieldcode”), or the field label (“[FieldLabel]”).</p>
+<p>Multiple referenced fields in a form (e.g. dependent dropdowns for admin levels) cannot be downloaded this way, as they are assigned a common field ID. However, queryTable also accepts formulas, so it is possible to include fields on referenced forms using the following notation:</p>
+<p>[territory].[name]</p>
+<p>This assumes that the form has a reference field named “territory” that refers to a Territory Form. It can also be done across multiple forms:</p>
+<p>[territory].[province].[name]</p>
+</div>
+<div id="download-the-full-database" class="section level3">
+<h3>Download the full database</h3>
+<p>It is also possible to download the full database contents (across all forms):</p>
+<pre class="r"><code>df &lt;- getDatabaseRecordTable(database.id=&quot;DatabaseID&quot;, as.single.table = FALSE )</code></pre>
+<p>This will create a list of all forms as data frames.</p>
+<p>Should all forms in a database have the same structure, the “as.single.table” argument can be set to TRUE to merge them all in a single table.</p>
+</div>
+</div>
+<div id="writing-data" class="section level2">
+<h2>Writing data</h2>
+<div id="updating-a-single-record" class="section level3">
+<h3>Updating a single record</h3>
+<p>When downloading a form, you will also obtain all record IDs in that form:</p>
+<p><img src="AI_Peru_3.png" /></p>
+<p>You can modify the value of a single record in a form through the function “updateRecord”:</p>
+<pre class="r"><code>updateRecord(formID, recordID, fieldValues)</code></pre>
+</div>
+</div>
+<div id="further-reading" class="section level2">
+<h2>Further reading</h2>
+<p>The activityinfo-R client has a long list of functions that were not covered here. More information is available by researching the package index in R.</p>
+<p>Additional material is available at the following links:</p>
+<ul>
+<li><p><a href="https://www.activityinfo.org/apidocs/index.html">ActivityInfo API Documentation</a></p></li>
+<li><p><a href="http://help.activityinfo.org/m/75865/l/1052332-writing-an-expression">Writing an Expression</a></p></li>
+<li><p>Activity Info Client source on <a href="https://github.com/bedatadriven/activityinfo-R">GitHub</a></p></li>
+<li><p>ActivityInfo API with R <a href="https://www.gotostage.com/channel/38037f33c0b74793a97a2b8061528f95/recording/fb4d53c6b18a433ba949baf7231577a0/watch?source=CHANNEL">(Webinar)</a></p></li>
+</ul>
+<p>ActivityInfo <a href="mailto:support@activityinfo.org">support</a> is very quick to respond to any questions on the R ActivityInfo package. A big thanks to Alex Bertram at Be Data Driven, the author of the activityinfo-R package, for his great work and the resources provided.</p>
+</div>

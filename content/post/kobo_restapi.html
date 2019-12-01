@@ -1,18 +1,21 @@
 ---
-title: 'Accessing data from REST API using R: examples for KoBoToolbox and Country
-  Based Pooled Fund (CBPF) data'
-author: Punya Prasad Sapkota
+title: "Accessing data from REST API using R: examples for KoBoToolbox and Country Based Pooled Fund (CBPF) data"
+author: "Punya Prasad Sapkota"
 date: '2018-12-08'
 categories:
   - Data
-tags:
   - KoBoToolbox
+  - API
   - WebData
+tags:
+  - Punya-Prasad-Sapkota
+  - IMMAP
 ---
 
 
 
 <p>R program has become a language of choice for data science work. It has rich feature library that can be readily used for variety of data management tasks. This article focuses on accessing data from the <a href="https://kobo.humanitarianresponse.info/">KoBoToolbox</a>.</p>
+<!--MORE-->
 <div id="kobotoolbox" class="section level1">
 <h1>KoBoToolbox</h1>
 <p><a href="http://support.kobotoolbox.org/getting-started/welcome/welcome-to-kobotoolbox">KoBoToolbox</a> provides a suite of tools for field data collection in the challenging environments. It is free and open source and works both on and offline.</p>
@@ -56,40 +59,40 @@ str(rawdata)</code></pre>
 ##  $ url        : chr &quot;https://kc.humanitarianresponse.info/api/v1/data/253043.csv&quot;
 ##  $ status_code: int 200
 ##  $ headers    :List of 8
-##   ..$ date               : chr &quot;Mon, 24 Dec 2018 11:48:28 GMT&quot;
+##   ..$ date               : chr &quot;Fri, 29 Nov 2019 22:31:10 GMT&quot;
 ##   ..$ content-type       : chr &quot;application/csv&quot;
 ##   ..$ content-length     : chr &quot;68467&quot;
 ##   ..$ server             : chr &quot;nginx/1.10.3 (Ubuntu)&quot;
-##   ..$ content-disposition: chr &quot;attachment; filename=aUBanmH6zXuLaDfUyoSbZB_2018_12_24.csv&quot;
+##   ..$ content-disposition: chr &quot;attachment; filename=aUBanmH6zXuLaDfUyoSbZB_2019_11_29.csv&quot;
 ##   ..$ content-language   : chr &quot;en&quot;
 ##   ..$ vary               : chr &quot;Accept, Accept-Language, Cookie&quot;
-##   ..$ allow              : chr &quot;GET, POST, PATCH, HEAD, OPTIONS&quot;
+##   ..$ allow              : chr &quot;GET, POST, PATCH, DELETE, HEAD, OPTIONS&quot;
 ##   ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;insensitive&quot; &quot;list&quot;
 ##  $ all_headers:List of 1
 ##   ..$ :List of 3
 ##   .. ..$ status : int 200
 ##   .. ..$ version: chr &quot;HTTP/2&quot;
 ##   .. ..$ headers:List of 8
-##   .. .. ..$ date               : chr &quot;Mon, 24 Dec 2018 11:48:28 GMT&quot;
+##   .. .. ..$ date               : chr &quot;Fri, 29 Nov 2019 22:31:10 GMT&quot;
 ##   .. .. ..$ content-type       : chr &quot;application/csv&quot;
 ##   .. .. ..$ content-length     : chr &quot;68467&quot;
 ##   .. .. ..$ server             : chr &quot;nginx/1.10.3 (Ubuntu)&quot;
-##   .. .. ..$ content-disposition: chr &quot;attachment; filename=aUBanmH6zXuLaDfUyoSbZB_2018_12_24.csv&quot;
+##   .. .. ..$ content-disposition: chr &quot;attachment; filename=aUBanmH6zXuLaDfUyoSbZB_2019_11_29.csv&quot;
 ##   .. .. ..$ content-language   : chr &quot;en&quot;
 ##   .. .. ..$ vary               : chr &quot;Accept, Accept-Language, Cookie&quot;
-##   .. .. ..$ allow              : chr &quot;GET, POST, PATCH, HEAD, OPTIONS&quot;
+##   .. .. ..$ allow              : chr &quot;GET, POST, PATCH, DELETE, HEAD, OPTIONS&quot;
 ##   .. .. ..- attr(*, &quot;class&quot;)= chr [1:2] &quot;insensitive&quot; &quot;list&quot;
 ##  $ cookies    :&#39;data.frame&#39;: 0 obs. of  7 variables:
 ##   ..$ domain    : logi(0) 
 ##   ..$ flag      : logi(0) 
 ##   ..$ path      : logi(0) 
 ##   ..$ secure    : logi(0) 
-##   ..$ expiration:Classes &#39;POSIXct&#39;, &#39;POSIXt&#39;  num(0) 
+##   ..$ expiration: &#39;POSIXct&#39; num(0) 
 ##   ..$ name      : logi(0) 
 ##   ..$ value     : logi(0) 
 ##  $ content    : raw [1:68467] 51 5f 45 2f ...
-##  $ date       : POSIXct[1:1], format: &quot;2018-12-24 11:48:28&quot;
-##  $ times      : Named num [1:6] 0 0.0295 0.0564 0.1276 0.3802 ...
+##  $ date       : POSIXct[1:1], format: &quot;2019-11-29 22:31:10&quot;
+##  $ times      : Named num [1:6] 0 0.183 0.314 0.595 0.97 ...
 ##   ..- attr(*, &quot;names&quot;)= chr [1:6] &quot;redirect&quot; &quot;namelookup&quot; &quot;connect&quot; &quot;pretransfer&quot; ...
 ##  $ request    :List of 7
 ##   ..$ method    : chr &quot;GET&quot;
@@ -98,7 +101,7 @@ str(rawdata)</code></pre>
 ##   .. ..- attr(*, &quot;names&quot;)= chr &quot;Accept&quot;
 ##   ..$ fields    : NULL
 ##   ..$ options   :List of 2
-##   .. ..$ useragent: chr &quot;libcurl/7.58.0 r-curl/3.2 httr/1.4.0&quot;
+##   .. ..$ useragent: chr &quot;libcurl/7.58.0 r-curl/4.2 httr/1.4.1&quot;
 ##   .. ..$ httpget  : logi TRUE
 ##   ..$ auth_token: NULL
 ##   ..$ output    : list()
@@ -141,6 +144,7 @@ str(rawdata)</code></pre>
 <p>To save it to the external CSV or even excel file, we can use any csv or xlsx writer functions available in R packages.</p>
 <pre class="r"><code>#using openxlsx package to save data
 openxlsx::write.xlsx(d_content_csv,&quot;kobo_data.xlsx&quot;,sheetName=&quot;data&quot;, row.names = FALSE)</code></pre>
+<pre><code>## Note: zip::zip() is deprecated, please use zip::zipr() instead</code></pre>
 <p>Let’s look at another example where data is in the JSON format. When downloading data, it is a common practice to check the number of submissions. The data download request is made only if the form has one or more records.</p>
 <pre class="r"><code>#submission count
 d_count_subm&lt;-0 #initialise

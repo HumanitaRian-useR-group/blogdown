@@ -1,10 +1,13 @@
 baseURL = "https://humanitarian-user-group.github.io"
-languageCode = "en"
-title = "HumanitaRian useR group"
-theme = "hugo-nuo"
+languageCode = "en-us"
+title = "HumanitaRian useR Group"
+theme = "hugo-future-imperfect"
 enableRobotsTXT = true
 PygmentsCodeFences = true
 canonifyurls = true
+preserveTaxonomyNames = true
+paginate = 10
+pluralizeListTitles = false
 
 # Disqus Username
 disqusShortname = "https-humanitarian-user-group-github-io"
@@ -18,26 +21,47 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
 # Initial site menu, you can extend menu with content.
 [[menu.main]]
   name = "Home"
-  weight = 10
-  identifier = "home"
-  url = "/"
-
+  identifier = "fa fa-home"
+  weight = 1
+  url = "/index.html"
 
 [[menu.main]]
-  name = "Tags"
-  weight = 20
-  identifier = "tags"
+  name = "Blog"
+  url = "/post/"
+  identifier = "fa fa-newspaper-o"
+  weight = 2
+
+[[menu.main]]
+  name = "About"
+  identifier = "fa fa-info-circle"
+  url = "/about/"
+  weight = 3
+
+[[menu.main]]
+  name = "Contributors"
+  identifier = "fa fa-newspaper-o"
   url = "/tags/"
+  weight = 4
 
 [[menu.main]]
-  name = "Skype-group"
-  pre = "<i class='fa fa-phone fa-fw'></i>"
-  weight = 40
+  name = "Categories"
+  identifier = "fa fa-database"
+  url = "/categories/"
+  weight = 5
+
+[[menu.main]]
+  name = "Join the Skype-group"
+  identifier = "fa fa-phone"
   url = "https://join.skype.com/qYBKC5q3wKp4"
+  weight = 6
 
 # Add your own params here
 [params]
+  description = "The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected."
   author = "HumanitaRian-useR-group"
+  # Sets navbarTitle to match the section of the website  
+  navbarTitle          = ""
+  dynamicTitles = true
   bg = "images/grey-prism.svg"
   avatar = "images/avatar.png"
   favicon = "images/favicon.ico"
@@ -48,64 +72,56 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   iconAndroid = "images/touch-icon-android.png"
   seotitle = "HumanitaRian-useR-group"
   subtitle = "~ Science is show me - not trust me ~"
-  description = "The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected."
-  paginate = 10
+
+  # Sets Estimated Reading Time to appear in post headers
+  includeReadingTime = true
+
+  # Sets where "View More Posts" links
+  viewMorePostLink = "/post/"
+
+  # Load custom CSS or JavaScript files. The variable is an array so that you
+  # can load multiple files if necessary. You can also load the standard theme
+  # files by adding the value, "default".
+  # customCSS            = ["default", "/path/to/file"]
+  # customJS             = ["default", "/path/to/file"]
+  customCSS            = ["default"]
+  customJS = ["default"]
+
+  # How to cite blog article
+  disable_citation = true
+
+  ## Add highlight
+  disable_highlight = false
+  highlightjsVersion = "9.11.0"
+  highlightjsCDN = "//cdn.bootcss.com"
+  highlightjsLang = ["r", "yaml"]
+  highlightjsTheme = "github"
+
 
   # Choose your social networks
   email = "humanitarian.user@gmail.com"
   github = "HumanitaRian-useR-group"
   twitter = "HumanitaRianus1"
   linkedin = "https://www.linkedin.com/groups/8732707/"
-#  weibo = "weibo_username"
- # wechat= "images/qrcode.jpg"  # Replace with your wechat qrcode image
-  # facebook = "facebook_username"
-  # google = "googlplus_id_number"
-  # instagram = "instagram_username"
-  # youtube = "youtube_username"
-  # vimeo = "vimeo_username"
-  # medium = "medium_username"
-  # quora = "quora_username"
-  # pinterest = "pinterest_username"
-  # dribbble = "dribbble_username"
-  # behance = "behance_username"
-  # jsfiddle = "jsfiddle_username"
-  # codepen = "codepen_username"
-  # zhihu = "zhihu_username"
-  # douban = "douban_username"
-  # bilibili = "bilibili_id_number"
-  # stackoverflow = "laozhu"
-  # codesandbox = "melaozhu"
-  # npm = "laozhu"
-  # reddit = "melaozhu"
 
-  # Changyan Comments (China Only)
-#  changyan = false
-#  changyanId = "cyt3toRiB"
-#  changyanConf = "prod_0908b1cb9a581501753cce1ed074dbe3"
+  # These are optional params related to the sidebar. They are recommended, but not
+  # required for proper functionality. HTML is supported within the params.
+[params.intro]
+  header    = ""
+  about = "The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected."
+  paragraph = "~ Science is 'show me' - not 'trust me' ~"
 
-  # Google Webmaster
-  # https://www.google.com/webmasters/
-#  googleSiteVerification = "_moDmnnBNVLBN1rzNxyGUGdPHE20YgbmrtzLIbxaWFc"
+  # This appears at the top of the sidebar above params.intro.header.
+  # A width of less than 100px is recommended from a design perspective.
+[params.intro.pic]
+  src       = "images/avatar.png"
+  # Sets Image to be a cirlce
+  circle    = false
+  # Sets Image to be Future Imperfect's hexagon
+  imperfect = true
+  width     = ""
+  alt       = "HumanitaRian useR Group"
 
-  # Bing Webmaster
-  # https://www.bing.com/toolbox/webmaster/
-#  msValidate = "22596E34341DD1D17D6022C44647E587"
-
-  # Baidu Webmaster (China Only)
-  # https://zhanzhang.baidu.com/
-  # baiduSiteVerification = "MZ23SPxxfa"
-
-  # Sogou Webmaster (China Only)
-  # http://zhanzhang.sogou.com/
-  # sogouSiteVerification = "m2jktMQTZm"
-
-  # 360 Webmaster (China Only)
-  # http://zhanzhang.so.com/
-  # soSiteVerification = "b7ab3b4c2edbc856642004d1b8c27a91"
-
-  # Baidu Tongji (China Only)
-  # https://tongji.baidu.com/
-  # baiduTongji = "e21dc1e8a592188271b615159dc88af7"
-
-  # ICP Number (China Only)
-# ICP = "苏ICP备16005986号-2"
+[params.postAmount]
+# Sets the number of recent posts to show in the sidebar. The default value is 5.
+  sidebar = 5

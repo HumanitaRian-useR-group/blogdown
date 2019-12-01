@@ -1,14 +1,16 @@
 ---
 title: "Quick and Dirty Data Security"
-author: "Bill Olander, Regional Bureau Dakar, WFP"
+author: "Bill Olander"
 date: "2019-06-11"
 categories:
   - Security
 tags:
   - WFP
+  - Bill-Olander
 ---
 
 In this quick tutorial, I share 3 methods to keep you and your data out of trouble.
+<!--MORE-->
 
 _Disclaimer_ : the fields of Data Security and Data Protection are vast. This tutorial hardly skims the surface. Check with your institution on the specific standards and tools which may be relevant to you.
 

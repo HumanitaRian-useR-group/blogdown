@@ -1,15 +1,16 @@
 ---
 title: "Data Quality Monitoring"
-author: "Bill Olander, Regional Bureau Dakar, WFP"
+author: "Bill Olander"
 date: "2019-06-18"
 categories:
   - Quality
 tags:
   - WFP
+  - Bill-Olander
 ---
 
 In this quick tutorial, I share a simple method to graphically display information to monitor data quality of survey teams using a little bit of dplyr and ggplot2
-
+<!--MORE-->
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
