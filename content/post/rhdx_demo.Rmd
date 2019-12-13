@@ -81,12 +81,12 @@ search_datasets("ACLED Mali", rows = 2) %>%
 
 ```{r, cache = TRUE}
 
-# library(rhxl)
-# search_datasets("ACLED Mali", rows = 2) %>%
-#   nth(1) %>%
-#   get_resources() %>%
-#   nth(1) %>%
-#   read_session(filename = "acled_mali.csv", hxl = TRUE)
+library(rhxl)
+search_datasets("ACLED Mali", rows = 2) %>%
+  nth(1) %>%
+  get_resources() %>%
+  nth(1) %>%
+  read_session(filename = "acled_mali.csv", hxl = TRUE)
 ```
 
 ## Save it for further use
