@@ -19,36 +19,9 @@ tags:
 <!--MORE-->
 <div id="install-rhdx" class="section level1">
 <h1>Install <code>rhdx</code></h1>
-<pre class="r"><code>devtools::install_git(&quot;https://gitlab.com/dickoa/rhdx&quot;)</code></pre>
-<pre><code>## 
-##   
-   checking for file ‘/tmp/Rtmpq12pBI/file32aa49fa60cc/DESCRIPTION’ ...
-  
-✔  checking for file ‘/tmp/Rtmpq12pBI/file32aa49fa60cc/DESCRIPTION’
-## 
-  
-  
-  
-─  preparing ‘rhdx’:
-##    checking DESCRIPTION meta-information ...
-  
-✔  checking DESCRIPTION meta-information
-## 
-  
-─  checking for LF line-endings in source and make files and shell scripts
-## 
-  
-─  checking for empty or unneeded directories
-## 
-  
-─  building ‘rhdx_0.1.0.9000.tar.gz’
-## 
-  
-   
-## </code></pre>
-<pre class="r"><code>devtools::install_github(&quot;dickoa/rhxl&quot;)</code></pre>
-<pre class="r"><code>devtools::install_git(&quot;https://gitlab.com/dickoa/rhdx&quot;)
-devtools::install_github(&quot;dickoa/rhxl&quot;)</code></pre>
+<pre class="r"><code>remotes::install_gitlab(&quot;dickoa/rhdx&quot;)</code></pre>
+<pre class="r"><code>remotes::install_github(&quot;dickoa/rhdx&quot;)
+remotes::install_gitlab(&quot;dickoa/rhdx&quot;)</code></pre>
 </div>
 <div id="connect-to-the-hdx-server" class="section level1">
 <h1>Connect to the HDX server</h1>
@@ -106,45 +79,139 @@ search_datasets(&quot;ACLED Mali&quot;, rows = 2)</code></pre>
 </div>
 <div id="we-select-the-first-resource-and-read-it-directly-in-r" class="section level2">
 <h2>We select the first resource and read it directly in R</h2>
-<pre class="r"><code># library(rhxl)
-# search_datasets(&quot;ACLED Mali&quot;, rows = 2) %&gt;%
-#   nth(1) %&gt;%
-#   get_resources() %&gt;%
-#   nth(1) %&gt;%
-#   read_session(filename = &quot;acled_mali.csv&quot;, hxl = TRUE)</code></pre>
+<pre class="r"><code>library(rhxl)
+search_datasets(&quot;ACLED Mali&quot;, rows = 2) %&gt;%
+  nth(1) %&gt;%
+  get_resource(1) %&gt;%
+  read_resource(filename = &quot;acled_mali.csv&quot;, hxl = TRUE)</code></pre>
+<pre><code>## # A tibble: 3,221 x 31
+##    data_id   iso event_id_cnty event_id_no_cnty event_date  year time_precision
+##      &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;                    &lt;dbl&gt; &lt;date&gt;     &lt;dbl&gt;          &lt;dbl&gt;
+##  1 6404732   466 MLI3331                   3331 2019-12-07  2019              1
+##  2 6405002   466 MLI3330                   3330 2019-12-07  2019              1
+##  3 6404731   466 MLI3329                   3329 2019-12-06  2019              1
+##  4 6404942   466 MLI3328                   3328 2019-12-05  2019              1
+##  5 6404990   466 MLI3326                   3326 2019-12-05  2019              1
+##  6 6404816   466 MLI3327                   3327 2019-12-05  2019              1
+##  7 6404729   466 MLI3324                   3324 2019-12-04  2019              1
+##  8 6404730   466 MLI3325                   3325 2019-12-04  2019              1
+##  9 6404771   466 MLI3323                   3323 2019-12-03  2019              1
+## 10 6404726   466 MLI3320                   3320 2019-12-02  2019              1
+## # … with 3,211 more rows, and 24 more variables: event_type &lt;chr&gt;,
+## #   sub_event_type &lt;chr&gt;, actor1 &lt;chr&gt;, assoc_actor_1 &lt;chr&gt;, inter1 &lt;dbl&gt;,
+## #   actor2 &lt;chr&gt;, assoc_actor_2 &lt;chr&gt;, inter2 &lt;dbl&gt;, interaction &lt;dbl&gt;,
+## #   region &lt;chr&gt;, country &lt;chr&gt;, admin1 &lt;chr&gt;, admin2 &lt;chr&gt;, admin3 &lt;chr&gt;,
+## #   location &lt;chr&gt;, latitude &lt;dbl&gt;, longitude &lt;dbl&gt;, geo_precision &lt;dbl&gt;,
+## #   source &lt;chr&gt;, source_scale &lt;chr&gt;, notes &lt;chr&gt;, fatalities &lt;dbl&gt;,
+## #   timestamp &lt;dbl&gt;, iso3 &lt;chr&gt;</code></pre>
 </div>
 <div id="save-it-for-further-use" class="section level2">
 <h2>Save it for further use</h2>
-<pre class="r"><code># search_datasets(&quot;ACLED Mali&quot;, rows = 2) %&gt;%
-#   nth(1) %&gt;%
-#   get_resources() %&gt;%
-#   nth(1) %&gt;%
-#   read_session(filename = &quot;acled_mali.csv&quot;, hxl = TRUE) -&gt; acled_mali</code></pre>
+<pre class="r"><code>search_datasets(&quot;ACLED Mali&quot;, rows = 2) %&gt;%
+  nth(1) %&gt;%
+  get_resource(1) %&gt;%
+  read_resource(filename = &quot;acled_mali.csv&quot;, hxl = TRUE) -&gt; acled_mali</code></pre>
 </div>
 </div>
 <div id="now-lets-see-where-we-have-these-conflicts-in-mali" class="section level1">
 <h1>Now let’s see where we have these conflicts in Mali</h1>
 <div id="first-step-just-select-the-coordinates" class="section level2">
 <h2>First step: just select the coordinates</h2>
-<pre class="r"><code># acled_mali %&gt;%
-#   select(longitude, latitude) %&gt;%
-#   distinct() -&gt; acled_mali_coord
-# acled_mali_coord</code></pre>
+<pre class="r"><code>acled_mali %&gt;%
+  select(longitude, latitude) %&gt;%
+  distinct() -&gt; acled_mali_coord
+acled_mali_coord</code></pre>
+<pre><code>## # A tibble: 745 x 2
+##    longitude latitude
+##        &lt;dbl&gt;    &lt;dbl&gt;
+##  1     1.46      15.8
+##  2    -2.22      15.1
+##  3    -3.75      14.2
+##  4    -3.31      14.4
+##  5     0.502     15.7
+##  6    -3.78      14.1
+##  7     0.696     15.0
+##  8    -0.349     17.0
+##  9     0.717     15.3
+## 10    -2.57      14.3
+## # … with 735 more rows</code></pre>
 </div>
 <div id="second-step-download-the-official-mali-cod-boundaries-from-hdx" class="section level2">
 <h2>Second step download the official Mali COD boundaries from HDX</h2>
-<pre class="r"><code># read_dataset(&quot;administrative-boundaries-cod-mli&quot;) %&gt;%
-#   get_resources()</code></pre>
+<pre class="r"><code>pull_dataset(&quot;administrative-boundaries-cod-mli&quot;) %&gt;%
+  get_resources()</code></pre>
+<pre><code>## [[1]]
+## &lt;HDX Resource&gt; 5a535eaf-25d6-4e6f-971a-2cb718aa0a97 
+##   Name: MLI COD-AB 2019_08_07.pdf
+##   Description: Mali COD-AB data sheet
+##   Size: 102888
+##   Format: PDF
+## 
+## [[2]]
+## &lt;HDX Resource&gt; 9dcd9787-f2bb-4121-9003-d2267ce73895 
+##   Name: MLI_AdminBoundaries_TabularData.xlsx
+##   Description: Mali administrative level 0 (country), 1 (region or capital district), 2 (cercle), or 3 (commune) gazetteer
+##   Size: 154595
+##   Format: XLSX
+## 
+## [[3]]
+## &lt;HDX Resource&gt; 186a227b-6e9c-4b90-8634-b6369da07e17 
+##   Name: mli_adm_1m_dnct_2019_SHP.zip
+##   Description: Mali administrative level 0 (country), 1 (region or capital district), 2 (cercle), or 3 (commune) shapefiles
+##   Size: 2480801
+##   Format: zipped shapefile
+## 
+## [[4]]
+## &lt;HDX Resource&gt; d3fa6359-4c1b-455e-a753-250d8df603f2 
+##   Name: mli_adm_1m_dnct_2019_EMF.zip
+##   Description: Mali administrative level 0 (country), 1 (region or capital district), 2 (cercle), or 3 (commune) EMF files
+##   Size: 2052742
+##   Format: EMF
+## 
+## [[5]]
+## &lt;HDX Resource&gt; 957e751b-8d5f-4755-ba68-c8dd614722f1 
+##   Name: mli_adm_1m_dnct_2019_KMZ.zip
+##   Description: Mali administrative level 0 (country), 1 (region or capital district), 2 (cercle), or 3 (commune) KMZ files
+##   Size: 1270822
+##   Format: ZIP
+## 
+## [[6]]
+## &lt;HDX Resource&gt; 6daca6b4-6c35-4599-8126-d1851ace73fb 
+##   Name: mli_adm_1m_dnct_2019.gdb.zip
+##   Description: Mali administrative level 0 (country), 1 (region or capital district), 2 (cercle), or 3 (commune) geodatabase
+##   Size: 2382299
+##   Format: zipped geodatabase
+## 
+## [[7]]
+## &lt;HDX Resource&gt; 89788941-205e-465e-bf1f-5c3b7422a71b 
+##   Name: MLI_FR (MapServer)
+##   Description: This map service contains OCHA Common Operational Datasets for Mali in French: Administrative Boundaries. The service is available as ESRI Map, ESRI Feature, WMS, and KML Services. See the OCHA COD/FOD terms of use for access and use constraints. 
+##   Size: 
+##   Format: LIVE SERVICE
+## 
+## [[8]]
+## &lt;HDX Resource&gt; c65c3cf7-e4d5-4069-8f26-54ca6f49a22e 
+##   Name: MLI_pcode (FeatureServer)
+##   Description: This service is intended as a labelling layer for PCODES from OCHA&#39;s Common Operational Datasets for Mali. As a map service it is intended to be used in conjunction with the basemap located at http://gistmaps.itos.uga.edu/arcgis/rest/services/COD_External/MLI_FR/MapServer. The service also provides feature access to Administrative Boundaries geometry and taxonomy. The service is available as ESRI Map, WMS, ESRI Feature, WFS and KML Services. 
+##   Size: 
+##   Format: LIVE SERVICE
+## 
+## [[9]]
+## &lt;HDX Resource&gt; b4ff6a29-c1c9-491c-8391-858281d644e7 
+##   Name: MLI_pcode (MapServer)
+##   Description: his service is intended as a labelling layer for PCODES from OCHA&#39;s Common Operational Datasets for Mali. As a map service it is intended to be used in conjunction with the basemap located at http://gistmaps.itos.uga.edu/arcgis/rest/services/COD_External/MLI_FR/MapServer. The service also provides feature access to Administrative Boundaries geometry and taxonomy. The service is available as ESRI Map, WMS, ESRI Feature, WFS and KML Services. 
+##   Size: 
+##   Format: LIVE SERVICE</code></pre>
 <p>We just need the country boundary (admin 0) which is the fourth resource</p>
-<pre class="r"><code># read_dataset(&quot;administrative-boundaries-cod-mli&quot;) %&gt;%
-#   get_resources() %&gt;%
-#   nth(4) %&gt;% 
-#   read_session() -&gt; adm0_mali</code></pre>
+<pre class="r"><code>pull_dataset(&quot;administrative-boundaries-cod-mli&quot;) %&gt;%
+  get_resource(4) %&gt;%
+  read_resource() -&gt; adm0_mali</code></pre>
 <p><code>ggplot2</code> is a R package for graphics with a nice grammar to compose any type of visual, we also use <code>sf</code> which add spatial data support.</p>
-<pre class="r"><code># library(sf)
-# ggplot() +
-#   geom_sf(data = adm0_mali) +
-#   geom_point(data = acled_mali_coord, aes(x = longitude, y = latitude)) +
-#   theme_bw()</code></pre>
+<pre class="r"><code>library(sf)
+ggplot() +
+  geom_sf(data = adm0_mali) +
+  geom_point(data = acled_mali_coord, aes(x = longitude, y = latitude)) +
+  theme_bw()</code></pre>
+<p><img src="/post/rhdx_demo_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>

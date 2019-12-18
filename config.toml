@@ -23,7 +23,7 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   name = "Home"
   identifier = "fa fa-home"
   weight = 1
-  url = "/index.html"
+  url = "/post/index.html"
 
 [[menu.main]]
   name = "Blog"
@@ -59,7 +59,7 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
 [params]
   description = "The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected."
   author = "HumanitaRian-useR-group"
-  # Sets navbarTitle to match the section of the website  
+  # Sets navbarTitle to match the section of the website
   navbarTitle          = ""
   dynamicTitles = true
   bg = "images/grey-prism.svg"

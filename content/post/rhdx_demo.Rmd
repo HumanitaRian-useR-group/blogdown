@@ -15,7 +15,7 @@ tags:
 knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE)
 ```
 
-rhdx is an R package to interact with the [HDX](https://data.humdata.org/) API. 
+rhdx is an R package to interact with the [HDX](https://data.humdata.org/) API.
 
 It provide a series of utilities to facilitates interaction & analysis.
 
@@ -29,14 +29,12 @@ The Humanitarian Data Exchange (HDX) is an open platform for sharing data across
 
 
 ```{r, eval = TRUE}
-devtools::install_git("https://gitlab.com/dickoa/rhdx")
-devtools::install_github("dickoa/rhxl")
-
+remotes::install_gitlab("dickoa/rhdx")
 ```
 
 ```{r, eval = FALSE}
-devtools::install_git("https://gitlab.com/dickoa/rhdx")
-devtools::install_github("dickoa/rhxl")
+remotes::install_github("dickoa/rhdx")
+remotes::install_gitlab("dickoa/rhdx")
 ```
 
 # Connect to the HDX server
@@ -84,19 +82,18 @@ search_datasets("ACLED Mali", rows = 2) %>%
 library(rhxl)
 search_datasets("ACLED Mali", rows = 2) %>%
   nth(1) %>%
-  get_resources() %>%
-  nth(1) %>%
-  read_session(filename = "acled_mali.csv", hxl = TRUE)
+  get_resource(1) %>%
+  read_resource(filename = "acled_mali.csv", hxl = TRUE)
 ```
 
 ## Save it for further use
 
 ```{r}
-# search_datasets("ACLED Mali", rows = 2) %>%
-#   nth(1) %>%
-#   get_resources() %>%
-#   nth(1) %>%
-#   read_session(filename = "acled_mali.csv", hxl = TRUE) -> acled_mali
+
+search_datasets("ACLED Mali", rows = 2) %>%
+  nth(1) %>%
+  get_resource(1) %>%
+  read_resource(filename = "acled_mali.csv", hxl = TRUE) -> acled_mali
 ```
 
 # Now let's see where we have these conflicts in Mali
@@ -104,34 +101,36 @@ search_datasets("ACLED Mali", rows = 2) %>%
 ## First step: just select the coordinates
 
 ```{r}
-# acled_mali %>%
-#   select(longitude, latitude) %>%
-#   distinct() -> acled_mali_coord
-# acled_mali_coord
+acled_mali %>%
+  select(longitude, latitude) %>%
+  distinct() -> acled_mali_coord
+acled_mali_coord
 ```
 
 ## Second step download the official Mali COD boundaries from HDX
 
 ```{r}
-# read_dataset("administrative-boundaries-cod-mli") %>%
-#   get_resources()
+
+pull_dataset("administrative-boundaries-cod-mli") %>%
+  get_resources()
+
 ```
 
 We just need the country boundary (admin 0) which is the fourth resource
 
 ```{r}
-# read_dataset("administrative-boundaries-cod-mli") %>%
-#   get_resources() %>%
-#   nth(4) %>% 
-#   read_session() -> adm0_mali
+
+pull_dataset("administrative-boundaries-cod-mli") %>%
+  get_resource(4) %>%
+  read_resource() -> adm0_mali
 ```
 
 `ggplot2` is a R package for graphics with a nice grammar to compose any type of visual, we also use `sf` which add spatial data support.
 
 ```{r}
-# library(sf)
-# ggplot() +
-#   geom_sf(data = adm0_mali) +
-#   geom_point(data = acled_mali_coord, aes(x = longitude, y = latitude)) +
-#   theme_bw()
+library(sf)
+ggplot() +
+  geom_sf(data = adm0_mali) +
+  geom_point(data = acled_mali_coord, aes(x = longitude, y = latitude)) +
+  theme_bw()
 ```

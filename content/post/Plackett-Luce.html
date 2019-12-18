@@ -8,6 +8,8 @@ categories:
 tags:
   - Okular-Analytics
   - Benini
+  - UNHCR
+  - Edouard-Legoupil
 ---
 
 <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
@@ -15,7 +17,7 @@ tags:
 
 <p>Ratings and rankings account for the majority of data generated in the course of rapid key informant needs assessments during humanitarian emergencies. Using this information to develop consolidated need prioritisation comes with challenges.
 <!--MORE--></p>
-<p>Practically speaking, the method presented here can be used for dataset that includes question such as</p>
+<p>Practically speaking, the method presented here can be used for dataset that includes questions such as</p>
 <blockquote>
 <p>what’s your first need? <em>(select_one among different options)</em></p>
 </blockquote>
@@ -25,7 +27,8 @@ tags:
 <blockquote>
 <p>what’s your third need? <em>(select_one among different options)</em></p>
 </blockquote>
-<p>This tutorial is based on the publication <a href="http://aldo-benini.org/Level2/HumanitData/OkularAnalytics_Priorities_and_Preferences_v2019_01_23.pdf">Priorities and preferences in humanitarian needs assessments -Their measurement by rating and ranking methods</a>. Humanitarian needs assessments seek to establish priorities for action and preferences of those whom the action will affect. Assessment teams collect data meant to capture the severity of problems and the situational aspects that matter in the evaluation of response options. Needs assessments establish priorities whereas <strong>response plans seek viable compromises between priorities</strong> and the means to address them.</p>
+<p>This tutorial is based on the publication <a href="http://aldo-benini.org/Level2/HumanitData/OkularAnalytics_Priorities_and_Preferences_v2019_01_23.pdf">Priorities and preferences in humanitarian needs assessments -Their measurement by rating and ranking methods</a> and the article <a href="https://www.researchgate.net/publication/328598369_Modelling_rankings_in_R_the_PlackettLuce_package">Modelling rankings in R: the PlackettLuce package</a> .</p>
+<p>Humanitarian needs assessments seek to establish priorities for action and preferences of those whom the action will affect. Assessment teams collect data meant to capture the severity of problems and the situational aspects that matter in the evaluation of response options. Needs assessments establish priorities whereas <strong>response plans seek viable compromises between priorities</strong> and the means to address them.</p>
 <p>When samples of stakeholders, such as key informants or relief workers, state priorities or preferences, the information chiefly produces <strong>ratings or rankings</strong> and such data are ordinal. In summarizing them, we need to avoid operations that require metric variables (such as the arithmetic mean) wich does not account for compensability; yet we will seek methods that produce aggregates with metric qualities (such as Borda counts) as these have a higher information value and offer greater flexibility for subsequent prioritisation analyses.</p>
 <p>When aggregating rating and ranking data and about the interpretation of the resulting measures of priority and preference, two distinctions are fundamental:</p>
 <ul>
@@ -34,7 +37,7 @@ tags:
 </ul>
 <div id="problem-statement" class="section level2">
 <h2>Problem statement</h2>
-<p>Borda implicitly makesseveral strong assumptions. Respondents are aware that they exercise voting</p>
+<p>The simple visualisation of 3 variable <code>Need1</code>, <code>Need2</code>, <code>Need3</code> does not allow to clear visualise priorities between needs. Borda count can be used to consolidate ranks. Though it implicitly makes a strong assumptions by implicitely accepting that respondents are aware that they exercise voting.</p>
 <p>The Plackett-Luce model of rankings overcomes analysis barrier linked to the analysis of ranked preferences and priorities:</p>
 <ul>
 <li><p>It produces a true ratio-level measure of the strength of preferences from full or partial choices.</p></li>
@@ -58,9 +61,10 @@ using &lt;- function(...) {
 
 ## Getting all necessary package
 using(&quot;foreign&quot;, &quot;PlackettLuce&quot;, &quot;tidyverse&quot;, &quot;qvcalc&quot;,&quot;kableExtra&quot;,&quot;stargazer&quot;,&quot;NLP&quot;,
-                     &quot;ggthemes&quot;, &quot;ggrepel&quot;, &quot;GGally&quot;, &quot;bbplot&quot;,&quot;ggpubr&quot;)
-
-rm(using)
+                     &quot;ggthemes&quot;, &quot;ggrepel&quot;, &quot;GGally&quot;, &quot;bbplot&quot;,&quot;ggpubr&quot;,&#39;grid&#39;,&#39;gridExtra&#39;, &#39;forcat&#39;, &#39;psychotree&#39;)</code></pre>
+<pre><code>## [[1]]
+## [1] FALSE</code></pre>
+<pre class="r"><code>rm(using)
 
 # This small function is used to have nicely left align text within charts produced with ggplot2
 left_align &lt;- function(plot_name, pieces){
@@ -82,7 +86,49 @@ AvgRank &lt;- function(BallotMatrix){
     Rankings &lt;- data.frame(Rankings, seq_along(Rankings[, 1]))
     names(Rankings) &lt;- c(&quot;Items&quot;, &quot;Average Rank&quot;, &quot;Position&quot;)
     return(Rankings)  
-}</code></pre>
+}
+
+
+## Some ggplot2 style
+kobo_unhcr_style_scatter &lt;- function() {
+    font &lt;- &quot;Arial&quot;
+    ggplot2::theme(
+
+      #This sets the font, size, type and colour of text for the chart&#39;s title
+      plot.title = ggplot2::element_text(family = font, size = 12, face = &quot;bold&quot;, color = &quot;#222222&quot;),
+
+      #This sets the font, size, type and colour of text for the chart&#39;s subtitle,  as well as setting a margin between the title and the subtitle
+      plot.subtitle = ggplot2::element_text(family = font, size = 11, margin = ggplot2::margin(9,0,9,0)),
+      plot.caption = ggplot2::element_blank(),
+
+      #This sets the position and alignment of the legend, removes a title and backround for it and sets the requirements for any text within the legend. The legend may often need some more manual tweaking when it comes to its exact position based on the plot coordinates.
+      legend.position = &quot;top&quot;,
+      legend.text.align = 0,
+      legend.background = ggplot2::element_blank(),
+      legend.title = ggplot2::element_blank(),
+      legend.key = ggplot2::element_blank(),
+      legend.text = ggplot2::element_text(family = font, size = 9, color = &quot;#222222&quot;),
+
+      #This sets the text font, size and colour for the axis text, as well as setting the margins and removes lines and ticks. In some cases, axis lines and axis ticks are things we would want to have in the chart
+      axis.title = ggplot2::element_text(family = font, size = 11, color = &quot;#222222&quot;),
+      axis.text = ggplot2::element_text(family = font, size = 10, color = &quot;#222222&quot;),
+      #axis.text.x = ggplot2::element_text(margin = ggplot2::margin(5, b = 9)),
+      axis.ticks = ggplot2::element_blank(),
+      axis.line = ggplot2::element_blank(),
+
+      #This removes all minor gridlines and adds major y gridlines. In many cases you will want to change this to remove y gridlines and add x gridlines.
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_line(color = &quot;#cbcbcb&quot;),
+      panel.grid.major.y = ggplot2::element_line(color = &quot;#cbcbcb&quot;),
+
+      #This sets the panel background as blank, removing the standard grey ggplot background colour from the plot
+      panel.background = ggplot2::element_blank(),
+
+      #This sets the panel background for facet-wrapped plots to white, removing the standard grey ggplot background colour and sets the title size of the facet-wrap title to font size 22
+      strip.background = ggplot2::element_rect(fill = &quot;white&quot;),
+      strip.text = ggplot2::element_text(size  = 11,  hjust = 0)
+    )
+  }</code></pre>
 </div>
 <div id="dataset" class="section level2">
 <h2>Dataset</h2>
@@ -294,7 +340,88 @@ Healthcare
 </tr>
 </tbody>
 </table>
-<p>The analysis will provide estimates for priorities among <strong>10 areas of need</strong> extracted from those 3 variables. Arguments to be used the Plackett-Luce model have been prefixed “l_” so that they can retrieved automatically.</p>
+<p>We can visualise this all together. We fist need to sort all the 3 needs based on frequency of the first need using <code>forcat</code> package. Note that factor level are inverted as the bar chard will be then flipped.</p>
+<pre class="r"><code>data_csv$priority1 &lt;- factor(data_csv$priority1, levels =  levels(fct_rev(fct_infreq(data_csv$priority1))))
+
+data_csv$priority2 &lt;- factor(data_csv$priority2, levels =  levels(fct_rev(fct_infreq(data_csv$priority1))))
+                             
+data_csv$priority3 &lt;- factor(data_csv$priority3, levels =  levels(fct_rev(fct_infreq(data_csv$priority1))))</code></pre>
+<pre class="r"><code>plot1 &lt;- ggplot(data = data_csv, aes( x = priority1)) +
+  geom_bar(fill = &quot;#2a87c8&quot;,colour = &quot;#2a87c8&quot;, stat = &quot;count&quot;, width = .8) +
+  guides(fill = FALSE) +
+  #geom_label(aes(label = ..count.., y = ..count..), stat = &quot;count&quot;, fill = &quot;#2a87c8&quot;, color = &#39;white&#39;) +
+  
+  geom_label(aes(label = priority1, y = 1), hjust = 0, vjust=0,  fill = &quot;#222222&quot;, color = &#39;white&#39;) +
+  coord_flip() +
+        xlab(&quot;Priority&quot;) +
+        ylab(&quot;&quot;) +
+       labs(title = &quot;Main Needs&quot;,  
+        subtitle = &quot;First Priority&quot;) +
+      bbc_style() +
+      theme( plot.title = element_text(size = 13),
+         plot.subtitle = element_text(size = 11),
+         plot.caption = element_text(size = 7, hjust = 1),
+         axis.text = element_text(size = 10), 
+         axis.text.y = element_blank(),
+         strip.text.x = element_text(size = 11),
+         panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+         panel.grid.major.y = element_blank())
+
+plot1 &lt;- ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &quot;caption&quot;)), ncol = 1, nrow = 1)
+
+
+plot2 &lt;-   ggplot(data = data_csv, aes( x = priority2)) +
+    geom_bar(fill = &quot;#2a87c8&quot;,colour = &quot;#2a87c8&quot;, stat = &quot;count&quot;, width = .8) +
+    guides(fill = FALSE) +
+   # geom_label(aes(label = ..count.., y = ..count..), stat = &quot;count&quot;, fill = &quot;#2a87c8&quot;, color = &#39;white&#39;) +
+    coord_flip() +
+    xlab(&quot;&quot;) +
+    ylab(&quot;&quot;) +
+     labs(title = &quot;&quot;,  
+        subtitle = &quot;Second Priority&quot;) +
+      bbc_style() +
+      theme( plot.title = element_text(size = 13),
+         plot.subtitle = element_text(size = 11),
+         plot.caption = element_text(size = 7, hjust = 1),
+         axis.text = element_text(size = 10),
+         axis.text.y = element_blank(),
+         strip.text.x = element_text(size = 11),
+         panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+         panel.grid.major.y = element_blank())
+  
+plot2 &lt;- ggpubr::ggarrange(left_align(plot2, c(&quot;subtitle&quot;, &quot;title&quot;)), ncol = 1, nrow = 1)
+
+plot3 &lt;-   ggplot(data = data_csv, aes( x = priority3)) +
+    geom_bar(fill = &quot;#2a87c8&quot;,colour = &quot;#2a87c8&quot;, stat = &quot;count&quot;, width = .8) +
+    guides(fill = FALSE) +
+    #geom_label(aes(label = ..count.., y = ..count..), stat = &quot;count&quot;, fill = &quot;#2a87c8&quot;, color = &#39;white&#39;) +
+    coord_flip() +
+    xlab(&quot;&quot;) +
+    ylab(&quot;&quot;) +
+     labs(title = &quot;&quot;,  
+        subtitle = &quot;Third Priority&quot;) +
+      bbc_style() +
+      theme( plot.title = element_text(size = 13),
+         plot.subtitle = element_text(size = 11),
+         plot.caption = element_text(size = 7, hjust = 1),
+         axis.text = element_text(size = 10), 
+         axis.text.y = element_blank(),
+         strip.text.x = element_text(size = 11),
+         panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+         panel.grid.major.y = element_blank())
+  
+plot3 &lt;- ggpubr::ggarrange(left_align(plot3, c(&quot;subtitle&quot;, &quot;title&quot;)), ncol = 1, nrow = 1)
+
+  
+grid.arrange( plot1, plot2, plot3,  ncol = 3)</code></pre>
+<p><img src="/post/Plackett-Luce_files/figure-html/unnamed-chunk-4-1.png" width="960" /></p>
+<p>The analysis will provide estimates for priorities among <strong>10 areas of need</strong> extracted from those 3 variables.</p>
+<pre class="r"><code>    ## thanks to: https://stackoverflow.com/questions/44232180/list-to-dataframe
+    # tosplitlist &lt;- strsplit(as.character(data[ , id]), &quot; &quot;)
+    # tosplitlist &lt;- stats::setNames(tosplitlist, seq_along(tosplitlist))
+    # tosplitlist2 &lt;- utils::stack(tosplitlist)
+    # tosplitframe &lt;- reshape2::dcast(tosplitlist2, ind ~ values, value.var = &quot;ind&quot;, fun.aggregate = length)</code></pre>
+<p>Arguments to be used the Plackett-Luce model have been prefixed “l_” so that they can retrieved automatically.</p>
 </div>
 <div id="borda-count" class="section level2">
 <h2>Borda Count</h2>
@@ -312,7 +439,7 @@ kable( borda,
         kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
 <table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">
-<span id="tab:unnamed-chunk-3">Table 2: </span>Borda Count per sector
+<span id="tab:unnamed-chunk-6">Table 2: </span>Borda Count per sector
 </caption>
 <thead>
 <tr>
@@ -440,6 +567,32 @@ l_fuel
 </tr>
 </tbody>
 </table>
+<p>We can visualise this all together</p>
+<pre class="r"><code>borda$items &lt;- gsub(pattern     = &quot;l_&quot;,
+                    replacement = &quot;&quot;,
+                    borda$Items)
+
+plot1 &lt;- ggplot(data = borda, aes( x = reorder( items, borda[ ,2]), ## Reordering country by Value
+                         y = borda[ ,2])) +
+  geom_bar(fill = &quot;#2a87c8&quot;, colour = &quot;#2a87c8&quot;,
+           stat = &quot;identity&quot;) + 
+  coord_flip() +
+  scale_y_continuous( ) + ## Format axis number
+  guides(fill = FALSE) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;Priority average Rank&quot;) +
+  labs(title = &quot;Main Needs according to Borda Count&quot;) +
+  bbc_style() +
+  theme( plot.title = element_text(size = 14),
+         plot.subtitle = element_text(size = 12),
+         plot.caption = element_text(size = 7, hjust = 1),
+         axis.text = element_text(size = 9),
+         panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
+         panel.grid.major.y = element_blank(),
+         strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &quot;caption&quot;)), ncol = 1, nrow = 1)</code></pre>
+<p><img src="/post/Plackett-Luce_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
 </div>
 <div id="plackett-luce-model" class="section level2">
 <h2>Plackett-Luce Model</h2>
@@ -496,7 +649,7 @@ kable(Plackett_Luce_est_z.values, caption = &quot;Model estimation&quot;) %&gt;%
            kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
 <table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">
-<span id="tab:unnamed-chunk-5">Table 3: </span>Model estimation
+<span id="tab:unnamed-chunk-9">Table 3: </span>Model estimation
 </caption>
 <thead>
 <tr>
@@ -806,7 +959,7 @@ kable(qv_estim_CI, caption = &quot;Model Confidence Interval&quot;) %&gt;%
            kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
 <table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
 <caption style="font-size: initial !important;">
-<span id="tab:unnamed-chunk-8">Table 4: </span>Model Confidence Interval
+<span id="tab:unnamed-chunk-12">Table 4: </span>Model Confidence Interval
 </caption>
 <thead>
 <tr>
@@ -1291,8 +1444,7 @@ safety
         ylab(&quot;&quot;) +
         labs(title = &quot; At first: Food, Water &amp; Fuel!&quot;,
                  subtitle =  &quot;Sectorial Preference, analysis based on Plackett-Luce model&quot;,
-                 caption = &quot;The black lines (also called &#39;whiskers&#39;) around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)&quot;,
-                 x = NULL, y = NULL) +
+                 caption = &quot;The black lines (also called &#39;whiskers&#39;) around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)&quot;) +
           bbc_style() +
             theme( plot.title = element_text(size = 14),
                    plot.subtitle = element_text(size = 12),
@@ -1303,7 +1455,7 @@ safety
                   strip.text.x = element_text(size = 11))
 
 ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &quot;caption&quot;)), ncol = 1, nrow = 1)</code></pre>
-<p><img src="/post/Plackett-Luce_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+<p><img src="/post/Plackett-Luce_files/figure-html/unnamed-chunk-13-1.png" width="960" /></p>
 </div>
 </div>
 <div id="compare-borda-count-plackett-luce-model" class="section level2">
@@ -1311,33 +1463,26 @@ ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &
 <p>Plackett-Luce does not score observed ranks mechanically, as Borda does. Rather, it considers the tendency for items to be at the higher end of the observed ranks and then extrapolates that information into simulated rankings of the unobserved ranks.</p>
 <p>The Borda count is indifferent to the unobserved rank orders. It is uninformative in this regard.</p>
 <p>We can compare the 2 method with the chart below:</p>
-<pre class="r"><code>plot1 &lt;- ggplot(data = qv_estim_CI, 
-             aes( x = items, 
-                  y = expEst, 
-                  ymin = expLCI,
-                  ymax = expUCI)) +
-      # geom_pointrange(color = &quot;purple&quot;, shape = 18,  size = 2) + 
-  
-        geom_point(color = &quot;purple&quot;, shape = 18,  size = 5) + 
-        geom_errorbar(aes(xmax = expLCI, xmin = expLCI), height = 1, color = &quot;black&quot;, width = 0.2, size = 1) +
-  
-        #geom_hline(yintercept = 1, lty = 2) +  # add a dotted line at x=1 after flip
-        coord_flip() +  # flip coordinates (puts labels on y axis)
-        xlab(&quot;Preference Level&quot;) +
-        ylab(&quot;&quot;) +
-        labs(title = &quot; At first: Food, Water &amp; Fuel!&quot;,
-                 subtitle =  &quot;Sectorial Preference, analysis based on Plackett-Luce model&quot;,
-                 caption = &quot;The black lines (also called &#39;whiskers&#39;) around the point represent the confidence interval for each sector (the shorter the line, the more precise is the estimate)&quot;,
-                 x = NULL, y = NULL) +
-          bbc_style() +
-            theme( plot.title = element_text(size = 14),
-                   plot.subtitle = element_text(size = 12),
-                   plot.caption = element_text(size = 7, hjust = 1),
-                  axis.text = element_text(size = 9),
-                  panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;), 
-                  panel.grid.major.y = element_blank(),
-                  strip.text.x = element_text(size = 11))
+<p>Note the usage of ggrepel to avoid having overlaping labels.</p>
+<pre class="r"><code>compare &lt;- merge( x = qv_estim_CI, y = borda, by = &quot;items&quot;)
 
-ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;, &quot;caption&quot;)), ncol = 1, nrow = 1)</code></pre>
+plot1 &lt;- ggplot(data = compare, aes(x = compare[ ,14], y = expEst)) +
+  geom_point(shape = 1) +    # Use hollow circles
+  # geom_smooth()  +          # Add a loess smoothed fit curve with confidence region
+  geom_label_repel(aes(label = items), size = 5) +
+  xlab(&quot;Preference Level - Borda&quot;) +
+  ylab(&quot;Preference Level - Plackett-Luce&quot;) +
+  labs(title = &quot;Comparing Needs Prioritisation&quot;,
+       subtitle =  &quot;Food or Fuel? It depends on how you count it...&quot;) +
+  kobo_unhcr_style_scatter() +
+  theme( plot.title = element_text(size = 14),
+         plot.subtitle = element_text(size = 12),
+         plot.caption = element_text(size = 7, hjust = 1),
+         axis.text = element_text(size = 9),
+         panel.grid.major.x = element_line(color = &quot;#cbcbcb&quot;),
+         panel.grid.major.y = element_line(color = &quot;#cbcbcb&quot;),
+         strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c(&quot;subtitle&quot;, &quot;title&quot;)), ncol = 1, nrow = 1)</code></pre>
 <p><img src="/post/Plackett-Luce_files/figure-html/model1-1.png" width="960" /></p>
 </div>
