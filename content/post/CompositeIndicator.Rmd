@@ -4,6 +4,7 @@ author: "Edouard Legoupil"
 date: "2019-11-28"
 categories:
   - Indicator
+  - Composite
   - Severity
 tags:
   - UNHCR

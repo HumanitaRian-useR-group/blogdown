@@ -27,7 +27,7 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
 
 [[menu.main]]
   name = "Blog"
-  url = "/post/"
+  url = "/post/index.html"
   identifier = "fa fa-newspaper-o"
   weight = 2
 
@@ -124,4 +124,4 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
 
 [params.postAmount]
 # Sets the number of recent posts to show in the sidebar. The default value is 5.
-  sidebar = 5
+  sidebar = 7

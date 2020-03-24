@@ -35,6 +35,7 @@ tags:
 <li><p>The first concerns <strong>statistical independence</strong>: Ratings (such as of the severity of unmet needs invarious sectors), though cognitively interdependent among items, statistically are independent. Rankings reflect an order among items and are dependent in both respects.For the analysis, both types have pros and cons; they contribute the most when used in tandem. This can happen during data collection – by asking both rating and ranking questions – and/or in the analysis – such as by ranking aggregate measures from ratings.</p></li>
 <li><p>Second, certain measures characterize <strong>cases</strong> (units like geographical areas, communities,camps, eventually households and individuals), while others express <strong>relationships with items</strong> (formally: options, aspects, attributes, indicators; substantively: sectors, agencies,problems, etc.). Methods suitable to compare Case A vs. Case B as well as Item X vs. Y are few; most of those based on ordinal data work only in one or the other way, not both.</p></li>
 </ul>
+<p>It is alsways good to recall that Ranking should be used only when the respondents can cognitively handle all the objectsat the same time. If the number of objects exceeds their memory and decisional capacity,the ensuing ranks will be incomplete or unreliable. If a complete ranking is desired, one possibility is to break the set of objects into subsets.</p>
 <div id="problem-statement" class="section level2">
 <h2>Problem statement</h2>
 <p>The simple visualisation of 3 variable <code>Need1</code>, <code>Need2</code>, <code>Need3</code> does not allow to clear visualise priorities between needs. Borda count can be used to consolidate ranks. Though it implicitly makes a strong assumptions by implicitely accepting that respondents are aware that they exercise voting.</p>
@@ -141,7 +142,7 @@ kobo_unhcr_style_scatter &lt;- function() {
 <p>The model-fitting function in PlackettLuce, requires data in the form of rankings, with the rank (1st, 2nd, 3rd, …) for each item. Therefore transformation is required for the data in their orginal stage as we can see below.</p>
 <pre class="r"><code>used_var &lt;- as.character(names(data_csv))[grepl(&quot;l_&quot;,as.character(names(data_csv)))]
  
- kable( data_csv[1:10 , c(&quot;block_id&quot;,&quot;population&quot;,&quot;priority1&quot;,&quot;priority3&quot;,&quot;priority3&quot;) ], 
+ kable( data_csv[1:10 , c(&quot;block_id&quot;,&quot;population&quot;,&quot;priority1&quot;,&quot;priority2&quot;,&quot;priority3&quot;) ], 
        caption = &quot;Data Overview&quot;) %&gt;%
         kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;bordered&quot;, &quot;condensed&quot;, &quot;responsive&quot;), font_size = 9)</code></pre>
 <table class="table table-striped table-bordered table-condensed table-responsive" style="font-size: 9px; margin-left: auto; margin-right: auto;">
@@ -160,10 +161,10 @@ population
 priority1
 </th>
 <th style="text-align:left;">
-priority3
+priority2
 </th>
 <th style="text-align:left;">
-priority3.1
+priority3
 </th>
 </tr>
 </thead>
@@ -179,7 +180,7 @@ CXB-001-001
 Food assistance
 </td>
 <td style="text-align:left;">
-Job opportunities
+Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
 Job opportunities
@@ -196,7 +197,7 @@ CXB-005-001
 Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
-Education for children
+Job opportunities
 </td>
 <td style="text-align:left;">
 Education for children
@@ -213,7 +214,7 @@ CXB-006-001
 Food assistance
 </td>
 <td style="text-align:left;">
-Healthcare
+Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
 Healthcare
@@ -230,7 +231,7 @@ CXB-007-001
 Food assistance
 </td>
 <td style="text-align:left;">
-Education for children
+Sanitation
 </td>
 <td style="text-align:left;">
 Education for children
@@ -247,7 +248,7 @@ CXB-008-001
 Food assistance
 </td>
 <td style="text-align:left;">
-Healthcare
+Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
 Healthcare
@@ -264,7 +265,7 @@ CXB-009-001
 Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
-Shelter
+Healthcare
 </td>
 <td style="text-align:left;">
 Shelter
@@ -281,7 +282,7 @@ CXB-010-001
 Food assistance
 </td>
 <td style="text-align:left;">
-Healthcare
+Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
 Healthcare
@@ -298,7 +299,7 @@ CXB-013-001
 Food assistance
 </td>
 <td style="text-align:left;">
-Sanitation
+Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
 Sanitation
@@ -315,7 +316,7 @@ CXB-014-001
 Cooking fuel and firewood
 </td>
 <td style="text-align:left;">
-Job opportunities
+Sanitation
 </td>
 <td style="text-align:left;">
 Job opportunities
@@ -332,7 +333,7 @@ CXB-016-001
 Sanitation
 </td>
 <td style="text-align:left;">
-Healthcare
+Education for children
 </td>
 <td style="text-align:left;">
 Healthcare

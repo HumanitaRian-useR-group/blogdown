@@ -38,6 +38,8 @@ When aggregating rating and ranking data and about the interpretation of the res
  * Second, certain measures characterize __cases__ (units like geographical areas, communities,camps, eventually households and individuals), while others express __relationships with items__ (formally: options, aspects, attributes, indicators; substantively: sectors, agencies,problems, etc.). Methods suitable to compare Case A vs. Case B as well as Item X vs. Y are few; most of those based on ordinal data work only in one or the other way, not both.
 
 
+It is alsways good to recall that Ranking should be used only when the respondents can cognitively handle all the objectsat the same time. If the number of objects exceeds their memory and decisional capacity,the ensuing ranks will be incomplete or unreliable. If a complete ranking is desired, one possibility is to break the set of objects into subsets.
+
 ## Problem statement
 
 The simple visualisation of 3 variable `Need1`, `Need2`, `Need3` does not allow to clear visualise priorities between needs. Borda count can be used to consolidate ranks. Though it implicitly makes a strong assumptions by implicitely accepting that respondents are aware that they exercise voting.
@@ -161,7 +163,7 @@ The model-fitting function in PlackettLuce, requires data in the form of ranking
  
 used_var <- as.character(names(data_csv))[grepl("l_",as.character(names(data_csv)))]
  
- kable( data_csv[1:10 , c("block_id","population","priority1","priority3","priority3") ], 
+ kable( data_csv[1:10 , c("block_id","population","priority1","priority2","priority3") ], 
        caption = "Data Overview") %>%
         kable_styling(bootstrap_options = c("striped", "bordered", "condensed", "responsive"), font_size = 9)
 
