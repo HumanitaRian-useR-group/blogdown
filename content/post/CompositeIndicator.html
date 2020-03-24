@@ -14,7 +14,7 @@ tags:
 <script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
-<p>In this tutorial, We will see how to build a <strong>severity index</strong> using a key informant interview dataset. Building such index, also called <strong>composite indicator</strong>, is among the regular and expected task of any humanitarian data analyst.The objective is to summarize information into a simple indicator that can reduce information overflow. <strong>Severity index</strong> informs the sectoral and inter-sectoral discussions taking place as part of the Humanitarian Needs Overview (HNO) process, in particular facilitating a comparison of needs across geographic areas.
+<p>In this tutorial, We will see how to build a <strong>severity index</strong> using a key informant interview dataset. Building such index, also called <strong>[composite indicator](a <a href="https://humanitarian-user-group.github.io/categories/composite/">composite indicator</a></strong>, is among the regular and expected task of any humanitarian data analyst.The objective is to summarize information into a simple indicator that can reduce information overflow. <strong>Severity index</strong> informs the sectoral and inter-sectoral discussions taking place as part of the Humanitarian Needs Overview (HNO) process, in particular facilitating a comparison of needs across geographic areas.
 <!--MORE--></p>
 <p>An approach to follow for this is described in the <em>Annex1: Technical Guidance</em> of the 2014 <a href="https://www.humanitarianresponse.info/sites/www.humanitarianresponse.info/files/documents/files/Comparison%20Tool%20Guidance%202015%20FINAL-EN.pdf#page=12">GUIDANCE: Humanitarian Needs Comparison Tool</a>. Those guidance were provided with a <a href="https://www.humanitarianresponse.info/sites/www.humanitarianresponse.info/files/documents/files/Nigeria_HNO_Comparison_Tool_v0.1.zip">complex and heavy excel tool</a> that includes many macros script and <a href="https://www.humanitarianresponse.info/sites/www.humanitarianresponse.info/files/documents/files/Comparison%20Tool%20Technical%20Instructions.pdf">13 pages of narrative explanation</a> to explain how it works.</p>
 <p>Rather than using script through complicated <em>Macros</em>, using R is a good and easier alternative. Build those severity index though a documented and linear process brings more credibility in the severity index generation as the analysis becomes de facto entirely reproducible (as a difference with complex excel spreadsheet with macro formula spread around multiple worksheet). Existing packages such as <a href="http://complexity.stat.unipd.it/system/files/Vidoli_Fusco.pdf">R Compind package</a> for composite indicators have already been developed and released as open source and therefore ready to be leveraged without any software procurement. The analysis below is fully reproducible and all code, including a summary power point, is accessible <a href="https://github.com/protection-cluster/severity-index-bahamas">here</a></p>
@@ -780,7 +780,7 @@ Bahama Palm Shores
 1.0000000
 </td>
 <td style="text-align:right;">
-1.264005
+1.295260
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -844,7 +844,7 @@ Blackwood
 1.0000000
 </td>
 <td style="text-align:right;">
-1.298701
+1.208459
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -876,7 +876,7 @@ Casuarina Point
 0.9189189
 </td>
 <td style="text-align:right;">
-1.032702
+1.044841
 </td>
 <td style="text-align:right;">
 0.8500000
@@ -908,7 +908,7 @@ Cedar Harbour
 1.0000000
 </td>
 <td style="text-align:right;">
-1.001669
+1.011804
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -972,7 +972,7 @@ Cherokee Sound
 1.0000000
 </td>
 <td style="text-align:right;">
-1.037165
+1.017812
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1004,7 +1004,7 @@ Cooper’s Town
 1.0000000
 </td>
 <td style="text-align:right;">
-1.005025
+1.017812
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1036,7 +1036,7 @@ Crossing Rocks
 1.0000000
 </td>
 <td style="text-align:right;">
-1.001252
+1.011378
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1068,7 +1068,7 @@ Crown Heaven
 1.0000000
 </td>
 <td style="text-align:right;">
-1.126761
+1.152738
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1100,7 +1100,7 @@ Dundas Town
 1.0000000
 </td>
 <td style="text-align:right;">
-1.010952
+1.006711
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1164,7 +1164,7 @@ Fox Town
 1.0000000
 </td>
 <td style="text-align:right;">
-1.001252
+1.012658
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1196,7 +1196,7 @@ Great Cistern
 1.0000000
 </td>
 <td style="text-align:right;">
-1.311475
+1.226994
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1260,7 +1260,7 @@ Little Harbour
 1.0000000
 </td>
 <td style="text-align:right;">
-1.010101
+1.019108
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1292,7 +1292,7 @@ Marsh Harbour
 0.7142857
 </td>
 <td style="text-align:right;">
-1.006470
+1.002147
 </td>
 <td style="text-align:right;">
 0.6666667
@@ -1324,7 +1324,7 @@ Mount Hope
 1.0000000
 </td>
 <td style="text-align:right;">
-1.176471
+1.171875
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1388,7 +1388,7 @@ Sandy Point
 1.0000000
 </td>
 <td style="text-align:right;">
-1.266501
+1.297276
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1452,7 +1452,7 @@ Treasure Cay
 1.0000000
 </td>
 <td style="text-align:right;">
-1.024765
+1.018676
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1484,7 +1484,7 @@ Wood Cay
 1.0000000
 </td>
 <td style="text-align:right;">
-1.067616
+1.099908
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1654,7 +1654,7 @@ Bahama Palm Shores
 15.5
 </td>
 <td style="text-align:right;">
-20.0
+22.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1718,7 +1718,7 @@ Blackwood
 15.5
 </td>
 <td style="text-align:right;">
-22.0
+20.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1750,7 +1750,7 @@ Casuarina Point
 7.0
 </td>
 <td style="text-align:right;">
-15.0
+16.0
 </td>
 <td style="text-align:right;">
 7.0
@@ -1782,7 +1782,7 @@ Cedar Harbour
 15.5
 </td>
 <td style="text-align:right;">
-9.0
+10.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1846,7 +1846,7 @@ Cherokee Sound
 15.5
 </td>
 <td style="text-align:right;">
-16.0
+12.5
 </td>
 <td style="text-align:right;">
 15.5
@@ -1878,7 +1878,7 @@ Cooper’s Town
 15.5
 </td>
 <td style="text-align:right;">
-10.0
+12.5
 </td>
 <td style="text-align:right;">
 15.5
@@ -1910,7 +1910,7 @@ Crossing Rocks
 15.5
 </td>
 <td style="text-align:right;">
-7.5
+9.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1974,7 +1974,7 @@ Dundas Town
 15.5
 </td>
 <td style="text-align:right;">
-13.0
+8.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2038,7 +2038,7 @@ Fox Town
 15.5
 </td>
 <td style="text-align:right;">
-7.5
+11.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2070,7 +2070,7 @@ Great Cistern
 15.5
 </td>
 <td style="text-align:right;">
-23.0
+21.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2134,7 +2134,7 @@ Little Harbour
 15.5
 </td>
 <td style="text-align:right;">
-12.0
+15.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2166,7 +2166,7 @@ Marsh Harbour
 4.0
 </td>
 <td style="text-align:right;">
-11.0
+7.0
 </td>
 <td style="text-align:right;">
 4.0
@@ -2262,7 +2262,7 @@ Sandy Point
 15.5
 </td>
 <td style="text-align:right;">
-21.0
+23.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2468,10 +2468,10 @@ abaco.osm &lt;- getTiles(
    zoom = 11,
    crop = TRUE,
    verbose = FALSE
-  )</code></pre>
-<pre><code>## Data and map tiles sources:
-## © OpenStreetMap contributors. Tiles style under CC BY-SA, www.openstreetmap.org/copyright.</code></pre>
-<pre class="r"><code>#tilesLayer(x = abaco.osm)</code></pre>
+  )
+
+
+#tilesLayer(x = abaco.osm)</code></pre>
 <p>Second step is to create a SpatialPointDataFrame with correct data and present it.</p>
 <p>An initial visualisation will be to present both the severity and the population size affected by this severity.</p>
 <pre class="r"><code>## Creating a spatial Point data frame with coordinates
