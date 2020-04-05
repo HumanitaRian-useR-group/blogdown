@@ -55,6 +55,12 @@ copyright = "© This post is licensed under a Creative Commons Attribution-NonCo
   url = "https://join.skype.com/qYBKC5q3wKp4"
   weight = 6
 
+[[menu.main]]
+  name = "learn more with R-bloggers"
+  identifier = "fa fa-universal-access"
+  url = "https://www.r-bloggers.com/"
+  weight = 7
+
 # Add your own params here
 [params]
   description = "The humanitarian data analysis professional community shall work towards using a common and open language to build interoperable and transparent analysis standards for joint needs assessments and to obtain maximum value for any data collected."
