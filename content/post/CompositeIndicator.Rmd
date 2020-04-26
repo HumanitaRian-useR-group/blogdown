@@ -6,6 +6,7 @@ categories:
   - Indicator
   - Composite
   - Severity
+  - Mapping
 tags:
   - UNHCR
   - Edouard-Legoupil
@@ -57,7 +58,7 @@ using <- function(...) {
 using("readr","readxl","dplyr","ggplot2","corrplot","psych","bbplot",
       "scales","ggiraph","ggrepel","Compind","ggcorrplot","kableExtra",
       "reshape2","qgraph", "sf","cartography",
-      "raster", "dismo", "xlsx", "rgdal")
+      "raster", "dismo", "xlsx", "rgdal", "SpatialPosition")
 
 rm(using)
 

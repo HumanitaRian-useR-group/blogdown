@@ -6,6 +6,7 @@ categories:
   - Indicator
   - Composite
   - Severity
+  - Mapping
 tags:
   - UNHCR
   - Edouard-Legoupil
@@ -50,7 +51,7 @@ using &lt;- function(...) {
 using(&quot;readr&quot;,&quot;readxl&quot;,&quot;dplyr&quot;,&quot;ggplot2&quot;,&quot;corrplot&quot;,&quot;psych&quot;,&quot;bbplot&quot;,
       &quot;scales&quot;,&quot;ggiraph&quot;,&quot;ggrepel&quot;,&quot;Compind&quot;,&quot;ggcorrplot&quot;,&quot;kableExtra&quot;,
       &quot;reshape2&quot;,&quot;qgraph&quot;, &quot;sf&quot;,&quot;cartography&quot;,
-      &quot;raster&quot;, &quot;dismo&quot;, &quot;xlsx&quot;, &quot;rgdal&quot;)</code></pre>
+      &quot;raster&quot;, &quot;dismo&quot;, &quot;xlsx&quot;, &quot;rgdal&quot;, &quot;SpatialPosition&quot;)</code></pre>
 <pre><code>## Warning in fun(libname, pkgname): rgeos: versions of GEOS runtime 3.8.0-CAPI-1.13.1
 ## and GEOS at installation 3.7.1-CAPI-1.11.1differ</code></pre>
 <pre class="r"><code>rm(using)
@@ -780,7 +781,7 @@ Bahama Palm Shores
 1.0000000
 </td>
 <td style="text-align:right;">
-1.295260
+1.313041
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -844,7 +845,7 @@ Blackwood
 1.0000000
 </td>
 <td style="text-align:right;">
-1.208459
+1.307190
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -876,7 +877,7 @@ Casuarina Point
 0.9189189
 </td>
 <td style="text-align:right;">
-1.044841
+1.058668
 </td>
 <td style="text-align:right;">
 0.8500000
@@ -908,7 +909,7 @@ Cedar Harbour
 1.0000000
 </td>
 <td style="text-align:right;">
-1.011804
+1.006711
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -972,7 +973,7 @@ Cherokee Sound
 1.0000000
 </td>
 <td style="text-align:right;">
-1.017812
+1.033592
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1004,7 +1005,7 @@ Cooper’s Town
 1.0000000
 </td>
 <td style="text-align:right;">
-1.017812
+1.002506
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1036,7 +1037,7 @@ Crossing Rocks
 1.0000000
 </td>
 <td style="text-align:right;">
-1.011378
+1.005025
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1068,7 +1069,7 @@ Crown Heaven
 1.0000000
 </td>
 <td style="text-align:right;">
-1.152738
+1.136364
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1100,7 +1101,7 @@ Dundas Town
 1.0000000
 </td>
 <td style="text-align:right;">
-1.006711
+1.010952
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1164,7 +1165,7 @@ Fox Town
 1.0000000
 </td>
 <td style="text-align:right;">
-1.012658
+1.003764
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1196,7 +1197,7 @@ Great Cistern
 1.0000000
 </td>
 <td style="text-align:right;">
-1.226994
+1.269841
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1260,7 +1261,7 @@ Little Harbour
 1.0000000
 </td>
 <td style="text-align:right;">
-1.019108
+1.002506
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1292,7 +1293,7 @@ Marsh Harbour
 0.7142857
 </td>
 <td style="text-align:right;">
-1.002147
+1.003584
 </td>
 <td style="text-align:right;">
 0.6666667
@@ -1324,7 +1325,7 @@ Mount Hope
 1.0000000
 </td>
 <td style="text-align:right;">
-1.171875
+1.184600
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1388,7 +1389,7 @@ Sandy Point
 1.0000000
 </td>
 <td style="text-align:right;">
-1.297276
+1.283444
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1452,7 +1453,7 @@ Treasure Cay
 1.0000000
 </td>
 <td style="text-align:right;">
-1.018676
+1.038961
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1484,7 +1485,7 @@ Wood Cay
 1.0000000
 </td>
 <td style="text-align:right;">
-1.099908
+1.053556
 </td>
 <td style="text-align:right;">
 1.0000000
@@ -1654,7 +1655,7 @@ Bahama Palm Shores
 15.5
 </td>
 <td style="text-align:right;">
-22.0
+23.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1718,7 +1719,7 @@ Blackwood
 15.5
 </td>
 <td style="text-align:right;">
-20.0
+22.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1750,7 +1751,7 @@ Casuarina Point
 7.0
 </td>
 <td style="text-align:right;">
-16.0
+17.0
 </td>
 <td style="text-align:right;">
 7.0
@@ -1782,7 +1783,7 @@ Cedar Harbour
 15.5
 </td>
 <td style="text-align:right;">
-10.0
+12.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1846,7 +1847,7 @@ Cherokee Sound
 15.5
 </td>
 <td style="text-align:right;">
-12.5
+14.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1878,7 +1879,7 @@ Cooper’s Town
 15.5
 </td>
 <td style="text-align:right;">
-12.5
+7.5
 </td>
 <td style="text-align:right;">
 15.5
@@ -1910,7 +1911,7 @@ Crossing Rocks
 15.5
 </td>
 <td style="text-align:right;">
-9.0
+11.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -1974,7 +1975,7 @@ Dundas Town
 15.5
 </td>
 <td style="text-align:right;">
-8.0
+13.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2038,7 +2039,7 @@ Fox Town
 15.5
 </td>
 <td style="text-align:right;">
-11.0
+10.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2070,7 +2071,7 @@ Great Cistern
 15.5
 </td>
 <td style="text-align:right;">
-21.0
+20.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2134,7 +2135,7 @@ Little Harbour
 15.5
 </td>
 <td style="text-align:right;">
-15.0
+7.5
 </td>
 <td style="text-align:right;">
 15.5
@@ -2166,7 +2167,7 @@ Marsh Harbour
 4.0
 </td>
 <td style="text-align:right;">
-7.0
+9.0
 </td>
 <td style="text-align:right;">
 4.0
@@ -2262,7 +2263,7 @@ Sandy Point
 15.5
 </td>
 <td style="text-align:right;">
-23.0
+21.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2326,7 +2327,7 @@ Treasure Cay
 15.5
 </td>
 <td style="text-align:right;">
-14.0
+15.0
 </td>
 <td style="text-align:right;">
 15.5
@@ -2358,7 +2359,7 @@ Wood Cay
 15.5
 </td>
 <td style="text-align:right;">
-17.0
+16.0
 </td>
 <td style="text-align:right;">
 15.5

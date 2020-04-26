@@ -6,6 +6,7 @@ categories:
   - DataViz
   - Refugee
   - API
+  - Mapping
 tags:
   - UNHCR
   - Edouard-Legoupil
