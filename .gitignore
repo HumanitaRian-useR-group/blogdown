@@ -4,9 +4,5 @@
 .Ruserdata
 .gitignore
 .gitkeep
-/**/*.Rmd
-config.toml
 blogdown-HumanitaRian-useR-group.Rproj
-content/
 static/
-themes/

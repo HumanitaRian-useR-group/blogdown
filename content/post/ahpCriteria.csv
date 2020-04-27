@@ -1,0 +1,6 @@
+name,label
+age,Age of head of household is above 50
+gender,Gender of head of household is female
+size,Household size is above 5
+need,Occurrence of Specific needs
+dependency,High dependency ratio (a quarter of less of the total number within household are working)

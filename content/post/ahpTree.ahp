@@ -1,0 +1,1788 @@
+Version: 2.0
+Goal:
+  name: Vulnerability ranking
+  preferences:
+    respondent_1:
+      pairwise:
+      - crit1: age
+        crit2: dependency
+        pref: 0.2
+      - crit1: age
+        crit2: gender
+        pref: 0.1428571
+      - crit1: age
+        crit2: need
+        pref: 9.0
+      - crit1: age
+        crit2: size
+        pref: 1.0
+      - crit1: gender
+        crit2: dependency
+        pref: 0.1428571
+      - crit1: gender
+        crit2: need
+        pref: 0.3333333
+      - crit1: gender
+        crit2: size
+        pref: 3.0
+      - crit1: need
+        crit2: dependency
+        pref: 0.2
+      - crit1: size
+        crit2: dependency
+        pref: 1.0
+      - crit1: size
+        crit2: need
+        pref: 0.1428571
+    respondent_2:
+      pairwise:
+      - crit1: age
+        crit2: dependency
+        pref: 0.1428571
+      - crit1: age
+        crit2: gender
+        pref: 0.1428571
+      - crit1: age
+        crit2: need
+        pref: 0.2
+      - crit1: age
+        crit2: size
+        pref: 0.3333333
+      - crit1: gender
+        crit2: dependency
+        pref: 0.2
+      - crit1: gender
+        crit2: need
+        pref: 1.0
+      - crit1: gender
+        crit2: size
+        pref: 0.3333333
+      - crit1: need
+        crit2: dependency
+        pref: 1.0
+      - crit1: size
+        crit2: dependency
+        pref: 3.0
+      - crit1: size
+        crit2: need
+        pref: 3.0
+    respondent_3:
+      pairwise:
+      - crit1: age
+        crit2: dependency
+        pref: 0.2
+      - crit1: age
+        crit2: gender
+        pref: 0.3333333
+      - crit1: age
+        crit2: need
+        pref: 5.0
+      - crit1: age
+        crit2: size
+        pref: 0.1428571
+      - crit1: gender
+        crit2: dependency
+        pref: 1.0
+      - crit1: gender
+        crit2: need
+        pref: 5.0
+      - crit1: gender
+        crit2: size
+        pref: 0.2
+      - crit1: need
+        crit2: dependency
+        pref: 0.3333333
+      - crit1: size
+        crit2: dependency
+        pref: 0.3333333
+      - crit1: size
+        crit2: need
+        pref: 0.1428571
+    respondent_4:
+      pairwise:
+      - crit1: age
+        crit2: dependency
+        pref: 0.3333333
+      - crit1: age
+        crit2: gender
+        pref: 3.0
+      - crit1: age
+        crit2: need
+        pref: 3.0
+      - crit1: age
+        crit2: size
+        pref: 3.0
+      - crit1: gender
+        crit2: dependency
+        pref: 1.0
+      - crit1: gender
+        crit2: need
+        pref: 0.1428571
+      - crit1: gender
+        crit2: size
+        pref: 7.0
+      - crit1: need
+        crit2: dependency
+        pref: 5.0
+      - crit1: size
+        crit2: dependency
+        pref: 3.0
+      - crit1: size
+        crit2: need
+        pref: 0.3333333
+  children:
+    age:
+      preferences:
+        respondent_1:
+          score:
+          - case01: 0.0
+          - case02: 1.0
+          - case03: 0.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 1.0
+          - case07: 0.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 1.0
+          - case11: 0.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 1.0
+          - case15: 0.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 1.0
+          - case19: 0.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 1.0
+          - case23: 0.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 1.0
+          - case27: 0.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 1.0
+          - case31: 0.0
+          - case32: 1.0
+        respondent_2:
+          score:
+          - case01: 0.0
+          - case02: 1.0
+          - case03: 0.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 1.0
+          - case07: 0.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 1.0
+          - case11: 0.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 1.0
+          - case15: 0.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 1.0
+          - case19: 0.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 1.0
+          - case23: 0.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 1.0
+          - case27: 0.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 1.0
+          - case31: 0.0
+          - case32: 1.0
+        respondent_3:
+          score:
+          - case01: 0.0
+          - case02: 1.0
+          - case03: 0.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 1.0
+          - case07: 0.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 1.0
+          - case11: 0.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 1.0
+          - case15: 0.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 1.0
+          - case19: 0.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 1.0
+          - case23: 0.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 1.0
+          - case27: 0.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 1.0
+          - case31: 0.0
+          - case32: 1.0
+        respondent_4:
+          score:
+          - case01: 0.0
+          - case02: 1.0
+          - case03: 0.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 1.0
+          - case07: 0.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 1.0
+          - case11: 0.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 1.0
+          - case15: 0.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 1.0
+          - case19: 0.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 1.0
+          - case23: 0.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 1.0
+          - case27: 0.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 1.0
+          - case31: 0.0
+          - case32: 1.0
+      children:
+        case01:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case02:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case03:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case04:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case05:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case06:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case07:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case08:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case09:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case10:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case11:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case12:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case13:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case14:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case15:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case16:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case17:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case18:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case19:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case20:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case21:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case22:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case23:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case24:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case25:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case26:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case27:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case28:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case29:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case30:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case31:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case32:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+    gender:
+      preferences:
+        respondent_1:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 1.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 0.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_2:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 1.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 0.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_3:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 1.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 0.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_4:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 1.0
+          - case04: 1.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 0.0
+          - case30: 0.0
+          - case31: 1.0
+          - case32: 1.0
+      children:
+        case01:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case02:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case03:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case04:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case05:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case06:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case07:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case08:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case09:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case10:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case11:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case12:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case13:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case14:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case15:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case16:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case17:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case18:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case19:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case20:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case21:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case22:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case23:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case24:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case25:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case26:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case27:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case28:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case29:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case30:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case31:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case32:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+    need:
+      preferences:
+        respondent_1:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 1.0
+          - case06: 1.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 0.0
+          - case28: 0.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_2:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 1.0
+          - case06: 1.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 0.0
+          - case28: 0.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_3:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 1.0
+          - case06: 1.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 0.0
+          - case28: 0.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_4:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 1.0
+          - case06: 1.0
+          - case07: 1.0
+          - case08: 1.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 0.0
+          - case26: 0.0
+          - case27: 0.0
+          - case28: 0.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+      children:
+        case01:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case02:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case03:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case04:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case05:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case06:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case07:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case08:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case09:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case10:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case11:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case12:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case13:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case14:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case15:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case16:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case17:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case18:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case19:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case20:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case21:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case22:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case23:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case24:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case25:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case26:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case27:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case28:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case29:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case30:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case31:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case32:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+    size:
+      preferences:
+        respondent_1:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 1.0
+          - case10: 1.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 0.0
+          - case24: 0.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_2:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 1.0
+          - case10: 1.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 0.0
+          - case24: 0.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_3:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 1.0
+          - case10: 1.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 0.0
+          - case24: 0.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_4:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 1.0
+          - case10: 1.0
+          - case11: 1.0
+          - case12: 1.0
+          - case13: 1.0
+          - case14: 1.0
+          - case15: 1.0
+          - case16: 1.0
+          - case17: 0.0
+          - case18: 0.0
+          - case19: 0.0
+          - case20: 0.0
+          - case21: 0.0
+          - case22: 0.0
+          - case23: 0.0
+          - case24: 0.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+      children:
+        case01:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case02:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case03:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case04:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case05:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case06:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case07:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case08:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case09:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case10:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case11:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case12:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case13:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case14:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case15:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case16:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case17:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case18:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case19:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case20:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case21:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case22:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case23:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case24:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case25:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case26:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case27:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case28:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case29:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case30:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case31:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case32:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+    dependency:
+      preferences:
+        respondent_1:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 0.0
+          - case16: 0.0
+          - case17: 1.0
+          - case18: 1.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_2:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 0.0
+          - case16: 0.0
+          - case17: 1.0
+          - case18: 1.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_3:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 0.0
+          - case16: 0.0
+          - case17: 1.0
+          - case18: 1.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+        respondent_4:
+          score:
+          - case01: 0.0
+          - case02: 0.0
+          - case03: 0.0
+          - case04: 0.0
+          - case05: 0.0
+          - case06: 0.0
+          - case07: 0.0
+          - case08: 0.0
+          - case09: 0.0
+          - case10: 0.0
+          - case11: 0.0
+          - case12: 0.0
+          - case13: 0.0
+          - case14: 0.0
+          - case15: 0.0
+          - case16: 0.0
+          - case17: 1.0
+          - case18: 1.0
+          - case19: 1.0
+          - case20: 1.0
+          - case21: 1.0
+          - case22: 1.0
+          - case23: 1.0
+          - case24: 1.0
+          - case25: 1.0
+          - case26: 1.0
+          - case27: 1.0
+          - case28: 1.0
+          - case29: 1.0
+          - case30: 1.0
+          - case31: 1.0
+          - case32: 1.0
+      children:
+        case01:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case02:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case03:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case04:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 0.0
+        case05:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case06:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case07:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case08:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 0.0
+        case09:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case10:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case11:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case12:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 0.0
+        case13:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case14:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case15:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case16:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 0.0
+        case17:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case18:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case19:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case20:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 0.0
+          dependency: 1.0
+        case21:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case22:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case23:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case24:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 0.0
+          dependency: 1.0
+        case25:
+          age: 0.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case26:
+          age: 1.0
+          gender: 0.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case27:
+          age: 0.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case28:
+          age: 1.0
+          gender: 1.0
+          need: 0.0
+          size: 1.0
+          dependency: 1.0
+        case29:
+          age: 0.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case30:
+          age: 1.0
+          gender: 0.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case31:
+          age: 0.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0
+        case32:
+          age: 1.0
+          gender: 1.0
+          need: 1.0
+          size: 1.0
+          dependency: 1.0

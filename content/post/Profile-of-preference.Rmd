@@ -1,0 +1,153 @@
+---
+title: "Profile of preference: Rashtree analysis"
+author: "Benini & Sons"
+date: "2019-12-10"
+categories:
+  - Indicator
+  - Prioritisation
+tags:
+  - Okular-Analytics
+  - Benini
+  - UNHCR
+  - Edouard-Legoupil
+---
+
+
+Often affected population or key informant are requested to share their preference for specific type of interventions.  How can we identify patterns of preference within a dataset? Can we identify  groupings  on  the  basis of several (categorical or continuous) variables that differentiate profiles optimally.
+
+<!--MORE-->
+
+This tutorial is based on the publication [Priorities and preferences in humanitarian needs assessments -Their measurement by rating and ranking methods](http://aldo-benini.org/Level2/HumanitData/OkularAnalytics_Priorities_and_Preferences_v2019_01_23.pdf).
+
+## Loading packages
+
+```{r setup, include = TRUE, message = FALSE, warning = FALSE, echo = TRUE}
+## This function will retrieve the packae if they are not yet installed.
+using <- function(...) {
+   libs <- unlist(list(...))
+    req <- unlist(lapply(libs,require,character.only = TRUE))
+    need <- libs[req == FALSE]
+    if (length(need) > 0) { 
+        install.packages(need)
+        lapply(need,require,character.only = TRUE)
+    }
+}
+
+## Getting all necessary package
+using("foreign", "PlackettLuce", "tidyverse", "qvcalc","kableExtra","stargazer","NLP",
+                     "ggthemes", "ggrepel", "GGally", "bbplot","ggpubr",'grid','gridExtra', 'forcat', 'psychotree')
+
+rm(using)
+
+# This small function is used to have nicely left align text within charts produced with ggplot2
+left_align <- function(plot_name, pieces){
+  grob <- ggplot2::ggplotGrob(plot_name)
+  n <- length(pieces)
+  grob$layout$l[grob$layout$name %in% pieces] <- 2
+  return(grob)
+}
+
+
+```
+
+## Dataset
+
+The data used in the this tutorial comes from NPM Site Assessment Round 11, 2018 - for  the  Rohingya  refugee camps in Bangladesh.
+
+```{r , include=TRUE, echo = TRUE}
+data_csv <- read.csv(file = "181227_2027AB_NPM11_Priorities_PlackettLuce.csv", header = T, sep = ",")
+
+
+ 
+used_var <- as.character(names(data_csv))[grepl("l_",as.character(names(data_csv)))]
+
+# Structure of the data:
+#str(data_csv)
+```
+
+
+## Can we identify differences within preferences?
+
+
+In the dataset, there are variables define groups among which sectoral needs priorities may differ significantly.This is corresponds to the detection of __Differential Item Functioning__ (DIF).
+
+
+For instance, we have 4 sub-districts with refugee settlements (`upazila`), a continuous population size variable for the 1,990 camp blocks (`log10pop`) (logarithmic), and the distance from the nearest health care facility (`healthWalk_enc`, with five levels) as a marginalization indicator. These 
+
+[Rashtree Visualisation](https://cran.r-project.org/web/packages/psychotree/vignettes/raschtree.pdf) are designed to identify significant differences within preferences.
+
+We first need to format the data so that it can be consumed by the algorithm.
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 10, fig.height=12, size="small"}
+covariate <- data_csv[ , c("upazila","log10pop","healthWalk_enc")]
+
+resp <- as.matrix(data_csv[ , used_var])
+
+## Rashtree accepts only 0 or 1 - so everything above 0 shalle be replaced by 1
+for (i in 1:nrow(resp)) {
+  for (j in 1:ncol(resp)) if (resp[i,j] > 0 ) resp[i,j] = 1
+}
+## resp will be a matrix variable used in the model
+covariate$resp <- resp
+
+# To exclude rows where all observed item responses are either 0 or 1, 
+# we select only the subsetof cases for which the proportion of correct item responses is strictly
+# between 0 and 1 forfuther analysis.
+covariate <- subset(covariate, rowMeans(resp, na.rm = TRUE) > 0 &   rowMeans(resp, na.rm = TRUE) < 1)
+``` 
+
+We can now compute and display it. 
+
+If the Rasch tree shows at least one split, DIF is present and there are groups with significant difference in their hiearchy of needs.
+
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 15, fig.height=12, size="small"}
+## Compute the rashtree
+raschtree <- raschtree(resp ~ upazila + log10pop + healthWalk_enc, data = covariate)
+
+## and plotting it...
+plot(raschtree)
+```
+
+
+We can now extract the groups and descriptions.
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 10, fig.height=12, size="small"}
+## Compute the rashtree
+
+kable( as.data.frame(itempar(raschtree)))
+
+
+```
+
+We can also explore trees by focusing on one aspect...
+
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 15, fig.height=12, size="small"}
+
+## and plotting it...
+plot(raschtree(resp ~ upazila, data = covariate),
+     main = "For upazila")
+```
+
+
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 15, fig.height=12, size="small"}
+
+## and plotting it...
+plot(raschtree(resp ~ log10pop , data = covariate),
+     main = "For population")
+```
+
+
+
+```{r , echo = TRUE,   warning = FALSE, tidy = TRUE, message=FALSE, comment = "", fig.width = 15, fig.height=12, size="small"}
+
+## and plotting it...
+plot(raschtree(resp ~  healthWalk_enc, data = covariate),
+     main = "For distance to Health Center")
+```
+
+
+
+

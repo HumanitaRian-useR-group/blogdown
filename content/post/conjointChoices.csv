@@ -1,0 +1,64 @@
+list_name,name,label
+gender,female,Female
+gender,male,Male
+scale_basicneeds,1, 1- Low vulnerability level in relation with Basic Needs
+scale_basicneeds,2,2
+scale_basicneeds,3,3
+scale_basicneeds,4,4
+scale_basicneeds,5,5
+scale_basicneeds,6,6
+scale_basicneeds,7,7
+scale_basicneeds,8,8
+scale_basicneeds,9,9- High vulnerability level in relation with Basic Needs
+scale_coping,1, 1- Low vulnerability level in relation with Coping Capacity
+scale_coping,2,2
+scale_coping,3,3
+scale_coping,4,4
+scale_coping,5,5
+scale_coping,6,6
+scale_coping,7,7
+scale_coping,8,8
+scale_coping,9,9- High vulnerability level in relation with Coping Capacity
+scale_wellbeing,1, 1- Low vulnerability level in relation with Well-Being
+scale_wellbeing,2,2
+scale_wellbeing,3,3
+scale_wellbeing,4,4
+scale_wellbeing,5,5
+scale_wellbeing,6,6
+scale_wellbeing,7,7
+scale_wellbeing,8,8
+scale_wellbeing,9,9- High vulnerability level in relation with Well-Being
+experience,one,One or less year of experience
+experience,twothree,Two to Three years of experience
+experience,fourfive,Four to Five years of experience
+experience,sixten,Six to Ten years of experience
+experience,overten,Over Ten years of experience
+organisation,ngofaith,Faith-based Non-Governmental-Organisation
+organisation,ngononfaith,Non Faith-based Non-Governmental-Organisation
+organisation,go,Governmental-Organisation
+organisation,un,United Nations Agency
+country,argentina,Argentina
+country,aruba,Aruba
+country,belize,Belize
+country,bolivia,Bolivia
+country,brazil,Brasil
+country,chile,Chile
+country,colombia,Colombia
+country,costaRica,Costa Rica
+country,cuba,Cuba
+country,curacao,Curacao
+country,ecuador,Ecuador
+country,elSalvador,El Salvador
+country,usa,Estados Unidos
+country,guatemala,Guatemala
+country,guyana,Guyana
+country,honduras,Honduras
+country,mexico,Mexico
+country,nicaragua,Nicaragua
+country,panama,Panama
+country,peru,Perú
+country,repdominicana,Republica Dominicana
+country,trinidadtobago,Trinidad y Tobago
+country,uruguay,Uruguay
+country,Venezuela,Venezuela
+country,OtherCountry,Other Country

@@ -1,0 +1,239 @@
+---
+title: "Fuzzy geocoding on location name"
+author: "Edouard Legoupil"
+date: '2019-12-14'
+categories:
+  - Geodata
+  - Geocoding
+tags:
+  - Edouard-Legoupil
+  - UNHCR
+---
+
+Geocoding location is one of the common task for many humanitarian information management officers. While the regular google is working very well in many countries, most of countries where we work are often poorly covered. [Geoname.org](https://www.geonames.org) is the most extensive database of toponyme. It aggregates a huge number of data source: [https://www.geonames.org/datasources/](https://www.geonames.org/datasources/).
+
+
+<!--MORE-->
+
+In this post, we will see how to quickly geocode a list of location using the fuzzy search capacity of Geonames. A fuzzy search is a process that get results that are likely to be relevant to a search argument even when the argument does not exactly correspond to the desired information. It makes use of algorithm to measure the [edit distance](https://en.wikipedia.org/wiki/Edit_distance) (i.e. a way of quantifying how dissimilar two strings (e.g., words) are to one another by counting the minimum number of operations required to transform one string into the other).
+
+Fuzzy search is quite powerfull when searching for locations in where toponyme are [transliteration](https://en.wikipedia.org/wiki/Transliteration) of arabic for instance (i.e. transferring a word from one alphabet of one language to another one).
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE)
+
+```
+
+
+## Geonames.org
+
+
+There's a dedicated R package to use geonames. First we need to create an account on geonames: [https://www.geonames.org/login](https://www.geonames.org/login) in order to get your own `geonamesUsername`. You will also need to enable the web service capacity: [http://www.geonames.org/enablefreewebservice](http://www.geonames.org/enablefreewebservice).
+
+
+
+## Install package
+
+```{r}
+#install.packages("geonames")
+library(geonames)
+library(kableExtra)
+##options(geonamesUsername="user")
+```
+
+```{r include=FALSE}
+##source("geonames-user.R")
+options(geonamesUsername = "edouard4unhcr")
+```
+
+
+## Available functions in the package
+
+### Basic search
+
+```{r}
+###
+### some sample usages
+
+# GNsearch(q="london",maxRows=10)
+# GNcities(north=44.1,south=-9.9,east=-22.4,west=55.2,lang="de")
+# GNchildren(3175395)
+```
+
+
+### Get nearby functions
+
+
+```{r}
+
+# GNneighbours(3041565)
+# GNneighbourhood(40.7834,-73.96625)
+# GNfindNearbyPlaceName(52,-128,300, "30","FULL") 
+# GNfindNearbyStreets(37.45,-122.18)
+```
+
+
+### Country functions
+
+
+```{r}
+
+
+# GNcountryCode(lat=47.03,lng=10.2)
+# GNcountryInfo()
+# GNcountryInfo("DE")
+
+```
+
+
+### Wikipedia functions
+
+
+```{r}
+## Wikipedia functions
+# GNwikipediaSearch("london")
+# GNfindNearbyWikipedia(postalcode=8775,country="CH",radius=10)
+# GNwikipediaBoundingBox(north=44.1,south=-9.9,east=-22.4,west=55.2)
+```
+
+
+### Timezone function
+
+
+```{r}
+
+
+# GNtimezone(57.01,-2)
+# GNtimezone(lat=0,lng=-40)
+# GNtimezone(lat=0,lng=-40, radius=200)
+```
+
+
+### Postal code function
+
+
+```{r}
+
+
+# GNfindNearbyPostalCodes(lat=47,lng=9)
+# GNpostalCodeSearch(postalcode=90210,country="FI")
+# GNpostalCodeSearch(postalcode=90210,country="US")
+# GNpostalCodeLookup(postalcode="LA1",country="UK")
+# GNpostalCodeLookup(postalcode="90210")
+# GNpostalCodeCountryInfo()
+
+
+```
+
+## Practical example in DRC
+
+Let's use a dataset recently shared on the "GRP Inter Agency IM" skype group.
+
+```{r}
+
+drc <- read.delim("drc.tsv")
+str(drc)
+```
+
+ We can search location one by one.
+ 
+This would be the URL on geonames [https://www.geonames.org/advanced-search.html?q=Ndoumba&country=CD&featureClass=P&continentCode=AF&fuzzy=0.6](https://www.geonames.org/advanced-search.html?q=Ndoumba&country=CD&featureClass=P&continentCode=AF&fuzzy=0.6).
+
+
+Beyond searching for the location name, you can note additional arguments to query the API:
+
+ 
+ * featureClass = "P", - Here we are looking for populated place, you can narrow down this search by selecting one feature among the 645 different type available: [https://www.geonames.org/export/codes.html](https://www.geonames.org/export/codes.html)
+ 
+ * fuzzy = "0.6", - This enables the fuzzy search. By changing this variable, you will tune the sensitivity of the similar locations identification capacity.
+ 
+ * country = "CD", continentCode = "AF" - This will narrow down your search to a country of continent.
+ 
+ 
+More documentation on the webservice is available at [https://www.geonames.org/export/web-services.html](https://www.geonames.org/export/web-services.html).
+
+
+```{r}
+
+
+search1 <- GNsearch(q = "Ndoumba",
+         featureClass = "P",
+         fuzzy = "0.6",
+         country = "CD",
+         continentCode = "AF",
+         maxRows = 20)
+
+
+
+kable(search1)
+
+```
+
+
+In order to get quick results, we can also loop through the list of locations.
+
+First we create an empty dataframe with the right structure.
+
+```{r}
+
+results <- data.frame( adminCode1= "",
+                       lng= "",
+                       geonameId= "",
+                       toponymName= "",
+                       countryId= "",
+                       fcl= "",
+                       population= "",
+                       countryCode= "",
+                       name= "",
+                       fclName= "",
+                       adminCodes1.ISO3166_2= "",
+                       countryName= "",
+                       fcodeName= "", 
+                       adminName1= "",
+                       lat= "", 
+                       fcode= "",
+                       Village= "",
+                       Departement= "",
+                       District= "",
+                       stringsAsFactors = FALSE)
+
+names(results)
+
+```
+
+Now we can loop around locations, to search and append results.
+
+```{r}
+for (i in 1:nrow(drc)) {
+  #i <- 1
+  Village <- as.character(drc[ i, c("VILLAGES")])
+  Departement <- as.character(drc[ i, c("Departement")])
+  District <- as.character(drc[ i, c("District")])
+  cat(paste0("searching for ", Village, "\n"))
+  
+  resulti <- GNsearch(q = Village ,
+                      country = "CD",
+                      featureClass = "P",
+                      continentCode = "AF",
+                      fuzzy = "0.6",
+                      maxRows = 20)
+  cat(paste0("Results potential ", nrow(resulti), "\n"))
+  if (nrow(resulti) > 0 ) {
+    resulti$Village  <- Village
+    resulti$Departement  <- Departement
+    resulti$District  <- District
+  results <- rbind(results, resulti) } else { results <- results}
+}
+
+#names(resulti)
+```
+
+Last write resuts in csv file.
+
+```{r}
+write.csv(results, "results.csv", row.names = FALSE)
+```
+
+et voila...
+
