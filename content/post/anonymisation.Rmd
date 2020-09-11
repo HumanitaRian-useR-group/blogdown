@@ -1,7 +1,7 @@
 ---
 title: "Anonymisation: Intrusion scenario and risk threshold"
+date: "2020-06-25"
 author: "Edouard Legoupil"
-date: "2020-04-02"
 categories:
   - Anonymisation
   - Survey
@@ -10,19 +10,19 @@ tags:
   - Edouard-Legoupil
 ---
 
-The dissemination of microdata (i.e. survey data) allows to reduce duplication in data collection; to improve the reliability and relevance of data; to support research to promoting development of new tools for using data. Last but not least, it enhance the credibility of the organisation that collected the data. 
+The dissemination of microdata (i.e. survey data) allows to reduce duplication in data collection; to improve the reliability and relevance of data; to support research to promoting development of new tools for using data. Last but not least, it enhance the credibility of the organization that collected the data. 
  
-In the context of the [grand bargain commitment of joint needs assessment](https://humanitarian-user-group.github.io/post/first-meeting/), being able to share such survey data, and therefore to __anonymise__ it beforehand, is a key requirement for collective data interpretation. 
+In the context of the [grand bargain commitment of joint needs assessment](https://humanitarian-user-group.github.io/post/first-meeting/), being able to access data in a dafe way is a key requirement for collective data interpretation. This post aims at demonstrating that the measurement of statistical disclosure risk is a key analysis and requirement for proper anonymisation.
 <!--MORE-->
  
 
-Anonymisation is often erroneously perceived as the operation of __simply removing  direct identifiers__ (such as _name,  telephone, GPS locations_) while in reality there are ways to re-identify persons through other means. On the hand, there's also a potential perception that anonymisation can be fully automatized through the application of data treatment based on predefined threshold. 
+Anonymisation is often erroneously perceived as the operation of __simply removing  direct identifiers__ (such as _name,  telephone, GPS locations_). There are indeed ways to re-identify persons through other means using undirect identifiers. In addition, there's also a potential perception that anonymisation can be fully automatized through the application of data treatment based on predefined threshold. 
 
-The analysis below shall help to understand how the selection of variables to be considered for anonymisation has direct influence on disclosure risk level measurement. Different organizations may have different views and well-intended organizations may disclose elements that are identified as sensitive by another one. Although there are [rule of thumbs to define acceptable level of acceptable risk](https://twitter.com/humdata/status/1159503163872952320), i.e. the threshold for disclosure risk, this value is not absolute and heavily depends on how risks were initially defined. 
+The selection of variables to be considered for anonymisation has direct influence on disclosure risk level measurement. Different organizations may have different views and well-intended organizations may disclose elements that are identified as sensitive by another one. Although there are [rule of thumbs to define acceptable level of acceptable risk](https://twitter.com/humdata/status/1159503163872952320), i.e. the threshold for disclosure risk, this value is not absolute and heavily depends on how risks were initially defined. 
 
 One challenge is therefore to avoid having anonymisation being seen as technical topic. This comes with a high risk of eluding the initial need for ethical and coordinated considerations on what can be a __realistic intrusion scenario__ in order to have acceptable re-identification risk endorsement. In reality, it is likely that different organisations may have very different views on what can be such realistic intrusion scenarios.
 
-This analysis demonstrate that the first need is actually frame joint and collective data interpretation through __research agreement and protocols__ rather than to assume that simple data sharing can the way forward. 
+This analysis demonstrate that the first need is actually frame joint and collective data interpretation, that shall include some level of disclosure risk analysis.  
 
 # Theoretical Steps
 
@@ -53,6 +53,7 @@ Specific data analysis is required to allow to quickly identify potential statis
 Perturbative and non-pertubative approaches to decrease the risks can be applied. This entails for __categoric__ variable: Recoding, suppressing, post randomization , and for __continuous__ variables: Adding noise, micro-aggregation, swapping... Based on a given threshold for disclosure risk, the “best” method to protect a microdata set is hard to determine in general. For a particular microdata set the “best” SDC method depends on the intended uses of the data by the users, the willingness of the statistical agency to disseminate this data set, the legal aspects of releasing these data, and on the structure of the data.
 
 The simplest option are: 
+
   * __Global recoding__, a non-perturbative method, that can be applied to both categorical and continuous key variables. The basic idea of recoding a categorical variable is to combine several categories into a new, less informative category. A frequent use case is the recoding of age given in years into age-groups. If the method is applied to a continuous variable, it means to discretize the variable. 
 
  * __Local suppression__ is a non-perturbative method that is typically applied to categorical variables to suppress certain values in at least one variable. Individual values are suppressed in a way that the set of variables with a specific pattern are increased. Local suppression can be configured either to achieve k-Anonymity with minimum suppression of values or to comply with a record-level risk threshold and suppress values only for records with higher risks than the threshold.
@@ -501,10 +502,13 @@ for (h in 1:length(selected.sensibleVars))
 
 # Conclusion
 
-Preparing raw microdata files for dissemination involves processes that may adjust the content and/or number of records. Microdata, when they reach a sufficient level of anonymisation to be released publicly (Public Use File) with data licensing terms equivalent to open data, comes with important information loss that does not make them good enough for instance for vulnerability analysis and scorecard calibration.
+Microdata files for open dissemination almost always differ from those strictly for use by staff involved in the responding agencies (application of the need to know data protection principle). When the analysis involves the need to target individuals, the confidentiality issue can often be addressed only through data enclave 
 
-Microdata files for open dissemination almost always differ from those strictly for use by staff involved in the responding agencies (application of the need to know data protection principle).  Licensed Files—also called Research Files—are distinct from PUFs: their dissemination is restricted to users who have received access authorization after submitting a documented application and signing an agreement governing the data’s use. While licensed files are usually anonymized to minimize the risk of identifying individuals when used in isolation, they may contain potentially identifiable data if linked with other data files.
+Microdata, when they reach a sufficient level of anonymisation to be released publicly (Public Use File), comes with important information loss that does not make them good enough for instance for vulnerability analysis and scorecard calibration.
 
-One important take-away form this exploration is to understand that anonymisation remains relative and that more than data sharing, the key challenge is to __establish research agreement__ in order to support collective and joint data interpretation. Within such research agreement, the confidentiality issue can be addressed in the joint data interpretation is performed directly on "crunched data", i.e. processed and visualized tabulation. Within such scenario, data sharing is more about 
+ Licensed Files—also called Research Files—are distinct from PUFs: their dissemination is restricted to users who have received access authorization after submitting a documented application and signing an agreement governing the data’s use. While licensed files are usually anonymized to minimize the risk of identifying individuals when used in isolation, they may contain potentially identifiable data if linked with other data files.
+
+One important take-away form this exploration is to understand that anonymisation remains relative and that more than data sharing, the key challenge is to __establish research agreement__ in order to support collective and joint data interpretation. 
+
 
 

@@ -301,7 +301,7 @@ psubg <-
   #ggmap() +
   
 ## Option for bing background
-  autoplot(map.latlon)  +
+  autoplot.OpenStreetMap(map.latlon)  +
   geom_sf(aes(fill = ppp), inherit.aes = FALSE, alpha = .15, 
           data = ppp1km_sf %>% st_filter(aleppo, .predicate = st_within)) +
   geom_sf(aes(geometry = psugeometry), inherit.aes = FALSE,
@@ -354,7 +354,7 @@ ssubg <-
 
 ## Option for bing background  
   
-  autoplot(map.latlon)  +
+  autoplot.OpenStreetMap(map.latlon)  +
   
   geom_sf(aes(fill = ppp), inherit.aes = FALSE, alpha = .15, 
           data = ppp100m %>% st_crop(ex) %>% st_as_sf()) +
