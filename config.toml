@@ -9,6 +9,8 @@ preserveTaxonomyNames = true
 paginate = 10
 pluralizeListTitles = false
 
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$"]
+
 # Disqus Username
 disqusShortname = "https-humanitarian-user-group-github-io"
 
@@ -17,6 +19,10 @@ googleAnalytics = "UA-131350181-1"
 
 # Copyright of your post
 copyright = "© This post is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License，please give source if you wish to quote or reproduce."
+
+
+[author]
+  name = "Collective"
 
 # Initial site menu, you can extend menu with content.
 [[menu.main]]

@@ -19,14 +19,18 @@ The dissemination of microdata (i.e. survey data) is important as it helps:
   
  * Enhancing the credibility of the organisation that collected the data. 
  
+In the context of the [grand bargain commitment of joint needs assessment](https://humanitarian-user-group.github.io/post/first-meeting/), being able to share such survey data, and therefore to anonymise it beforehand, is a key requirement for collective data interpretation. 
+ 
 
 Anonymisation is often erroneously perceived as the operation of __simply removing  direct identifiers__ (such as _name,  telephone, GPS locations_) while in reality there are ways to re-identify persons through other means. On the hand, there's also a potential perception that anonymisation can be fully automatized through the application of data treatment based on predefined threshold. 
 
 The analysis below shall help to understand how the selection of variables to be considered for anonymisation has direct influence on disclosure risk level measurement. Different organizations may have different views and well-intended organizations may disclose elements that are identified as sensitive by another one. Although there are [rule of thumbs to define acceptable level of acceptable risk](https://twitter.com/humdata/status/1159503163872952320), i.e. the threshold for disclosure risk, this value is not absolute and heavily depends on how risks were initially defined. 
 
-One challenge is therefore to avoid having anonymisation being seen as technical topic eluding the initial need for ethical and coordinated considerations on what can be __realistic intrusion scenario__ in order to have acceptable re-identification risk endorsement and the need to frame joint and collective data interpretation through __research agreement and protocols__ rather than simple data sharing. 
+One challenge is therefore to avoid having anonymisation being seen as technical topic. This comes with a high risk of eluding the initial need for ethical and coordinated considerations on what can be a __realistic intrusion scenario__ in order to have acceptable re-identification risk endorsement. In reality, it is likely that different organisations may have very different views on what can be such realistic intrusion scenarios.
 
-# Steps to follow
+This analysis demonstrate that the first need is actually frame joint and collective data interpretation through __research agreement and protocols__ rather than to assume that simple data sharing can the way forward. 
+
+# Theoretical Steps
 
 ## Step 1: Intrusion scenario
 
@@ -52,13 +56,12 @@ Specific data analysis is required to allow to quickly identify potential statis
 
 ## Step 3: Anonymisation treatment
 
-It can also help to define some potential recoding for those variables. Global recoding is a non-perturbative method that can be applied to both categorical and continuous key variables. The basic idea of recoding a categorical variable is to combine several categories into a new, less informative category. A frequent use case is the recoding of age given in years into age-groups. If the method is applied to a continuous variable, it means to discretize the variable. 
+Perturbative and non-pertubative approaches to decrease the risks can be applied. This entails for __categoric__ variable: Recoding, suppressing, post randomization , and for __continuous__ variables: Adding noise, micro-aggregation, swapping... Based on a given threshold for disclosure risk, the “best” method to protect a microdata set is hard to determine in general. For a particular microdata set the “best” SDC method depends on the intended uses of the data by the users, the willingness of the statistical agency to disseminate this data set, the legal aspects of releasing these data, and on the structure of the data.
 
-Perturbative and non-pertubative approaches to decrease the risks can be applied. This entails for __categoric__ variable: Recoding, suppressing, post randomization , and for __continuous__ variables: Adding noise, micro-aggregation, swapping 
+The simplest option are: 
+  * __Global recoding__, a non-perturbative method, that can be applied to both categorical and continuous key variables. The basic idea of recoding a categorical variable is to combine several categories into a new, less informative category. A frequent use case is the recoding of age given in years into age-groups. If the method is applied to a continuous variable, it means to discretize the variable. 
 
-Based on a given threshold for disclosure risk, the “best” method to protect a microdata set is hard to determine in general. For a particular microdata set the “best” SDC method depends on the intended uses of the data by the users, the willingness of the statistical agency to disseminate this data set, the legal aspects of releasing these data, and on the structure of the data.
-
-Local suppression is a non-perturbative method that is typically applied to categorical variables to suppress certain values in at least one variable. Individual values are suppressed in a way that the set of variables with a specific pattern are increased. Local suppression can be configured either to achieve k-Anonymity with minimum suppression of values or to comply with a record-level risk threshold and suppress values only for records with higher risks than the threshold.
+ * __Local suppression__ is a non-perturbative method that is typically applied to categorical variables to suppress certain values in at least one variable. Individual values are suppressed in a way that the set of variables with a specific pattern are increased. Local suppression can be configured either to achieve k-Anonymity with minimum suppression of values or to comply with a record-level risk threshold and suppress values only for records with higher risks than the threshold.
 
 Once those additional treatments are applied, this report can be then regenerated till the __ratio "Disclosure Risk" / "Information Loss"__ is acceptable.
 
@@ -68,18 +71,21 @@ Once those additional treatments are applied, this report can be then regenerate
 
 The World Bank has sponsored the development of a [disclosure Control Toolbox](http://www.ihsn.org/software/disclosure-control-toolbox) for the R language and built on the recommendations from the [International Household Survey Network](http://ihsn.org/sites/default/files/resources/ihsn-working-paper-007-Oct27.pdf).
 
-```{r  }
+```{r }
 knitr::opts_chunk$set(
  collapse = TRUE,
- comment = " "
+ comment = " ",
+ message = FALSE, 
+ warning = FALSE
 )
-## This function will retrieve the packae if they are not yet installed.
+
+## Getting all necessary package
 using <- function(...) {
     libs <- unlist(list(...))
     req <- unlist(lapply(libs,require,character.only = TRUE))
     need <- libs[req == FALSE]
     if (length(need) > 0) { 
-        install.packages(need)
+        install.packages(need, repos = 'https://mirrors.tuna.tsinghua.edu.cn/CRAN/')
         lapply(need,require,character.only = TRUE)
     }
 }
@@ -124,42 +130,11 @@ Also called “_implicit identifiers_” or “_quasi-identifiers_”: Set of va
 
 The UK Government Statistical Service [policy for the release of social survey microdata](https://www.ons.gov.uk/methodology/methodologytopicsandstatisticalconcepts/disclosurecontrol/policyforsocialsurveymicrodata) suggests that:
 
-> A small selection of common key variables from a range of datasets is: 
+> A small selection of common key variables from a range of datasets is: age (individual or grouped), sex, health indicator (more likely to be a key variable if a specific condition), size or composition of household, income (household or individual), occupation or industry, ethnic group, religion, country of birth, marital status, house type, house age, floor size, college course, course provider, number of dependent children in household....
 
->  -   age (individual or grouped)
+The tables below present the variables that were considered for __two distinct intrusion risk scenario__: one considering __age as a quasi-identifier__ and the second one not that does not consider age as a quasi-identifier . 
 
->  - 	sex
-
->  - 	health indicator (more likely to be a key variable if a specific condition)
-
->  - 	size or composition of household
-
->  - 	income (household or individual)
-
->  - 	occupation or industry
-
->  - 	ethnic group
-
->  - 	religion
-
->  - 	country of birth
-
->  - 	marital status
-
->  -  house type
-
->  - 	house age
-
->  - 	floor size
-
->  - 	college course
-
->  - 	course provider
-
->  - 	number of dependent children in household
-
-
-The tables below present the variables that were considered for __two distinct disclosure risk scenario: one considering age as an identifier and the other one excluding it__. We will see how the scenario influences risk measurement.
+We will see in the rest of the analysis the relation between risk measurement and the selection of intrusion scenario
   
 ```{r  }
 # Key variables - To be converted to factors
@@ -176,9 +151,9 @@ selected.keyVars2 <- c("hargeisa3",# Sex of household member
                       "hargeisa14" #Number of members living in household
 )
 
-metadata[metadata$Name %in% selected.keyVars, c( "Name","Label", "Topic", "QuestionType" )] %>% rmarkdown::paged_table()
+metadata[metadata$Name %in% selected.keyVars, c( "Name","Label", "QuestionType" )] %>% rmarkdown::paged_table()
 
-selected.key1 <- metadata[metadata$Name %in% selected.keyVars, c( "Name","Label", "Topic", "QuestionType" )]
+selected.key1 <- metadata[metadata$Name %in% selected.keyVars, c( "Name","Label", "QuestionType" )]
 
 ```
 
@@ -221,8 +196,6 @@ dataanom.anom <- dataanom[ , c('id', selectedHouseholdID,
  selected.sensibleVars,
  selected.weightVar)]
 
-
-
 # Create initial sdc object for selected variables
 sdc.dataanom <- createSdcObj(dat = dataanom.anom,
  keyVars = selected.keyVars,
@@ -238,24 +211,27 @@ sdc.dataanom2 <- createSdcObj(dat = dataanom.anom,
  hhId = selectedHouseholdID ,
  weightVar = selected.weightVar)
 
-
 ## Basic information on the input obj such as the number of observations and variables.
 #print(sdc.dataanom, type = "general")
 ```
 
-
 ### Risk for categoric variables: Observations violating k-anonymity
 
-A dataset is said to satisfy k-anonymity for k > 1 if, for each combination of values of quasi-identifiers (e.g. age, gender, occupation, etc.), at least k records exist in the dataset sharing that combination. 
+A dataset is said to satisfy `k-anonymity` for k > 1 if, for each combination of values of quasi-identifiers (e.g. age, gender, occupation, etc.), at least `k` records exist in the dataset sharing that combination. Often k-anonymity is analysed at level 2, 3 & 5. 
 
-Often k-anonymity is analysed at level 2, 3 & 5. It 
+#### Risk Estimation
+
+```{r message=TRUE}
+## displays information about 2- and 3-anonymity for First scenario: age as an identifier 
+print(sdc.dataanom, type = "kAnon")
+```
+
+```{r message=TRUE}
+## displays information about 2- and 3-anonymity for second scenario: age NOT as an identifier 
+print(sdc.dataanom2, type = "kAnon") 
+```
 
 ```{r }
-
-## displays information about 2- and 3-anonymity
-print(sdc.dataanom, type = "kAnon")
-print(sdc.dataanom2, type = "kAnon")
-
 #cat("Show lines with variables that violate k-anonymity 3")
 #dataanom.anom[sdc.dataanom@risk$individual[,2] < 3,]
 #dataanom.anom[sdc.dataanom@risk$individual[,2] < 5,]
@@ -273,12 +249,13 @@ risk52 <- nrow(dataanom.anom[sdc.dataanom2@risk$individual[,2] < 5,])
 
 If we compare: 
 
- * There are __`r risk21`__ # of observations (i.e. _`r risk21/ numrow`%_) that violate `2-anonymity` based on the first intrusion scenario, and  __`r risk22`__ (i.e. _`r risk21/ numrow`%_) when considering the second scenario.
+ * There are __`r risk21`__ # of observations (i.e. _`r round(risk21/ numrow,2)`%_) that violate `2-anonymity` based on the first intrusion scenario, and  __`r risk22`__ (i.e. _`r round(risk21/ numrow,2)`%_) when considering the second scenario.
 
- * There are __`r risk31`__ # of observations (i.e. _`r risk31/ numrow`%_)  that violate `3-anonymity` based on the first intrusion scenario, and  __`r risk32`__ (i.e. _`r risk32/ numrow`%_) when considering the second scenario.
+ * There are __`r risk31`__ # of observations (i.e. _`r round(risk31/ numrow,2)*100`%_)  that violate `3-anonymity` based on the first intrusion scenario, and  __`r risk32`__ (i.e. _`r round(risk32/ numrow,2)*100`%_) when considering the second scenario.
 
- * There are __`r risk51`__ # of observations (i.e. _`r risk51/ numrow`%_) that violate `5-anonymity` based on the first intrusion scenario, and  __`r risk52`__ (i.e. _`r risk52/ numrow`%_) when considering the second scenario.
+ * There are __`r risk51`__ # of observations (i.e. _`r round(risk51/ numrow,2)*100`%_) that violate `5-anonymity` based on the first intrusion scenario, and  __`r risk52`__ (i.e. _`r round(risk52/ numrow,2)*100`%_) when considering the second scenario.
 
+#### Consequences of treatment
 Even after recoding, some combinations of key variable values may still violate k-anonymity, or some records may still have relatively high disclosure risks. Further recoding, however, may not be possible because the data utility would be too low. At this stage, local suppression can be applied. Let's see how many would be needed to achieve. 
 
 The belows estimates are computed for both the original and perturbed data and then compared. 
@@ -288,16 +265,18 @@ In parenthesis, the same statistics are shown for the unmodified data (NA (missi
 
  * `2-anonymity`
 
-
+Required suppression for scenario where age is considered as an identifier 
 ```{r  }
 sdc.dataanomk12 <- localSuppression(sdc.dataanom, k = 2, importance = NULL) 
 calcRisks(sdc.dataanomk12)
 ```
-
+Required suppression for scenario where age is NOT considered as an identifier 
 ```{r  }
 sdc.dataanomk22 <- localSuppression(sdc.dataanom2, k = 2, importance = NULL) 
 calcRisks(sdc.dataanomk22)
 ```
+
+Below is the number of records value to remove to achieve `2-anonymity` depending on the scenario
 
 ```{r  }
 
@@ -316,18 +295,19 @@ localsuppressionk2  %>% rmarkdown::paged_table()
 ```
 
  * `3-anonymity`
-
+Required suppression for scenario where age is considered as an identifier 
 ```{r  }
 ## displays various information if local suppression has been applied
 sdc.dataanomk13 <- localSuppression(sdc.dataanom, k = 3, importance = NULL) 
 calcRisks(sdc.dataanomk13)
 ```
-
+Required suppression for scenario where age is NOT considered as an identifier 
 ```{r  }
 sdc.dataanomk23 <- localSuppression(sdc.dataanom2, k = 3, importance = NULL) 
 calcRisks(sdc.dataanomk23)
 ```
 
+Below is the number of records value to remove to achieve `3-anonymity` depending on the scenario
 ```{r  }
 sdc.dataanom.localsuppressionk13 <- as.data.frame(t(as.data.frame(sdc.dataanomk13@localSuppression$supps)))
 sdc.dataanom.localsuppressionk13$Name <- row.names(sdc.dataanom.localsuppressionk13)
@@ -346,6 +326,8 @@ localsuppressionk3  %>% rmarkdown::paged_table()
 
 ### Risks linked to observations: Population Frequencies and Global re-identification risks
 
+When using sample based dataset, `k-Anonymity` can be difficult to achieve. In this case, using Individual Risk threshold is an option to consider. 
+
 Risk evaluation is based on the concept of uniqueness in the sample and/or in the population. The focus is on individual units that possess rare combinations of selected key variables.  The assumption is that units having rare combinations of key variables can be more easily identified and thus have a higher risk of re-identification/disclosure. It is possible to cross-tabulate all identifying variables and view their cast.  Keys possessed by only very few individuals are considered risky, especially if these observations also have small sampling weights. This means that the expected number of individuals with these patterns is expected to be low in the population as well.
 
 Two approaches can be used to determine the global risk for a dataset using individual risks: 
@@ -356,8 +338,15 @@ Two approaches can be used to determine the global risk for a dataset using indi
 
 The expected __number of re-identification__ indicator is estimated by the sum of record-level disclosure risks. The __number of records with higher risks than the main part of the dataset__ are the number of records whose individual risk is greater than 0.1 and greater than 2 X [median(r) + 2 X MAD(r)], where r is a vector of record-level risks, and MAD is the median absolute deviation of all record-level risks. 
 
+#### Risk Estimation 
 
-Here the global risk is __` riskglobal`%__ based on the first intrusion scenario, and  __` riskglobalh`%__ when considering the second scenario. 
+```{r }
+
+riskglobal <- sdc.dataanom@risk$global
+riskglobalh <- sdc.dataanom2@risk$global
+```
+
+Here the global risk is __`r riskglobal`%__ based on the first intrusion scenario, and  __`r riskglobalh`%__ when considering the second scenario. 
 
 We can also visualise Individual risk:
 
@@ -375,25 +364,26 @@ risksum$class.fixed.name <- recode_factor(risksum$class.fixed, `1` = "Individual
                                      `6` = "Individual Risk is higher than 15% and lower than 30%",
                                      `7` = "Individual Risk is higher than 30% and lower than 50%",
                                      `8` = "Individual Risk is higher than 50% and lower than 100%")
-risksum$class.fixed.name <- factor(risksum$class.fixed.name, levels = c("Individual Risk is lower than 0.1%",
-                                                                   "Individual Risk is higher than 0.1% and lower than 1%",
-                                                                   "Individual Risk is higher than 1% and lower than 5%",
-                                                                   "Individual Risk is higher than 5% and lower than 10%",
-                                                                    "Individual Risk is higher than 10% and lower than 15%",
-                                                                   "Individual Risk is higher than 15% and lower than 30%",
-                                                                   "Individual Risk is higher than 30% and lower than 50%",
-                                                                   "Individual Risk is higher than 50% and lower than 100%"))
+risksum$class.fixed.name <- factor(risksum$class.fixed.name, 
+                                   levels = c("Individual Risk is lower than 0.1%",
+                                               "Individual Risk is higher than 0.1% and lower than 1%",
+                                               "Individual Risk is higher than 1% and lower than 5%",
+                                               "Individual Risk is higher than 5% and lower than 10%",
+                                                "Individual Risk is higher than 10% and lower than 15%",
+                                               "Individual Risk is higher than 15% and lower than 30%",
+                                               "Individual Risk is higher than 30% and lower than 50%",
+                                               "Individual Risk is higher than 50% and lower than 100%"))
 risksum2 <- as.data.frame(cbind(table(risksum$class.fixed.name ), prop.table(table(risksum$class.fixed.name ))))
 risksum2$class.fixed.name <- row.names(risksum2) 
-risksum2$class.fixed.name <- factor(risksum2$class.fixed.name, levels = c(
-  "Individual Risk is higher than 50% and lower than 100%",
-  "Individual Risk is higher than 30% and lower than 50%",
-  "Individual Risk is higher than 15% and lower than 30%",
-  "Individual Risk is higher than 10% and lower than 15%",
-  "Individual Risk is higher than 5% and lower than 10%",
-  "Individual Risk is higher than 1% and lower than 5%",
-  "Individual Risk is higher than 0.1% and lower than 1%",
-  "Individual Risk is lower than 0.1%"))
+risksum2$class.fixed.name <- factor(risksum2$class.fixed.name, 
+                                    levels = c( "Individual Risk is higher than 50% and lower than 100%",
+                                                "Individual Risk is higher than 30% and lower than 50%",
+                                                "Individual Risk is higher than 15% and lower than 30%",
+                                                "Individual Risk is higher than 10% and lower than 15%",
+                                                "Individual Risk is higher than 5% and lower than 10%",
+                                                "Individual Risk is higher than 1% and lower than 5%",
+                                                "Individual Risk is higher than 0.1% and lower than 1%",
+                                                "Individual Risk is lower than 0.1%"))
 risksum2$percentreponse <- paste0(round(risksum2$V2*100,digits = 1),"%")
 
 risksum2$scenario <- "age.is.an.id"
@@ -413,13 +403,13 @@ risksum$class.fixed.name <- recode_factor(risksum$class.fixed, `1` = "Individual
                                      `7` = "Individual Risk is higher than 30% and lower than 50%",
                                      `8` = "Individual Risk is higher than 50% and lower than 100%")
 risksum$class.fixed.name <- factor(risksum$class.fixed.name, levels = c("Individual Risk is lower than 0.1%",
-                                                                   "Individual Risk is higher than 0.1% and lower than 1%",
-                                                                   "Individual Risk is higher than 1% and lower than 5%",
-                                                                   "Individual Risk is higher than 5% and lower than 10%",
-                                                                    "Individual Risk is higher than 10% and lower than 15%",
-                                                                   "Individual Risk is higher than 15% and lower than 30%",
-                                                                   "Individual Risk is higher than 30% and lower than 50%",
-                                                                   "Individual Risk is higher than 50% and lower than 100%"))
+                                               "Individual Risk is higher than 0.1% and lower than 1%",
+                                               "Individual Risk is higher than 1% and lower than 5%",
+                                               "Individual Risk is higher than 5% and lower than 10%",
+                                                "Individual Risk is higher than 10% and lower than 15%",
+                                               "Individual Risk is higher than 15% and lower than 30%",
+                                               "Individual Risk is higher than 30% and lower than 50%",
+                                               "Individual Risk is higher than 50% and lower than 100%"))
 risksum2 <- as.data.frame(cbind(table(risksum$class.fixed.name ), prop.table(table(risksum$class.fixed.name ))))
 risksum2$class.fixed.name <- row.names(risksum2) 
 risksum2$class.fixed.name <- factor(risksum2$class.fixed.name, levels = c(
@@ -456,10 +446,13 @@ plot.background = element_rect(fill = "transparent",colour = NA))
 
 ```
 
-When using sample based dataset, k-Anonymity can be difficult to achieve. In this case, using Individual Risk threshold is an option to consider. 
 
-A 5% threshold may be used as a reference (although again it depends initially on the intrusion scenario..).
 
+#### Consequences of treatment 
+
+A 5% threshold may be used as a reference (although again it depends initially on the intrusion scenario..) to apply the anonymisation treatment.
+
+Below is the number of records value to remove to achieve minimise the  depending on the scenario
 
 ```{r }
 for (h in 1:length(selected.keyVars))
@@ -514,6 +507,10 @@ for (h in 1:length(selected.sensibleVars))
 
 # Conclusion
 
-Microdata hen they reach a sufficient level of anonymisation to be released publicly with data licensing terms equivalent to open data are indeed not much useful anymore given the subsequent information loss.
+Preparing raw microdata files for dissemination involves processes that may adjust the content and/or number of records. Microdata, when they reach a sufficient level of anonymisation to be released publicly (Public Use File) with data licensing terms equivalent to open data, comes with important information loss that does not make them good enough for instance for vulnerability analysis and scorecard calibration.
+
+Microdata files for open dissemination almost always differ from those strictly for use by staff involved in the responding agencies (application of the need to know data protection principle).  Licensed Files—also called Research Files—are distinct from PUFs: their dissemination is restricted to users who have received access authorization after submitting a documented application and signing an agreement governing the data’s use. While licensed files are usually anonymized to minimize the risk of identifying individuals when used in isolation, they may contain potentially identifiable data if linked with other data files.
+
+One important take-away form this exploration is to understand that anonymisation remains relative and that more than data sharing, the key challenge is to __establish research agreement__ in order to support collective and joint data interpretation. Within such research agreement, the confidentiality issue can be addressed in the joint data interpretation is performed directly on "crunched data", i.e. processed and visualized tabulation. Within such scenario, data sharing is more about 
 
 

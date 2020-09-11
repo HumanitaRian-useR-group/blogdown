@@ -190,84 +190,37 @@ if (!file.exists(destfile)) {
 time_series <- read.csv("unhcr_popstats_export_time_series_all_data.csv", stringsAsFactors = FALSE,
                         skip = 3, na.string = c("", "*"))
 names(time_series)[2] <- "Country"
+
+## Load geographic mapping reference 
+reference <- read.csv("reference.csv")
+
 ### Rewrite country name in UNHCR dataset for further matching - country of asylum
 time_series$ctryiso <- as.character(time_series$Country)
-time_series$ctryiso[time_series$Country == "Bonaire"] <- "Bonaire, Sint Eustatius and Saba"
-time_series$ctryiso[time_series$Country == "Central African Rep."] <- "Central African Republic"
-time_series$ctryiso[time_series$Country == "China, Hong Kong SAR"] <- "China, Hong Kong Special Administrative Region"
-time_series$ctryiso[time_series$Country == "China, Macao SAR"] <- "China, Macao Special Administrative Region"
-time_series$ctryiso[time_series$Country == "C\xf4te d'Ivoire"] <- "C?te d'Ivoire"
-time_series$ctryiso[time_series$Country == "Cura\xe7ao"] <- "Cura?ao"
-time_series$ctryiso[time_series$Country == "Czech Rep."] <- "Czechia"
-time_series$ctryiso[time_series$Country == "Dem. Rep. of the Congo"] <- "Democratic Republic of the Congo"
-time_series$ctryiso[time_series$Country == "Dominican Rep."] <- "Dominican Republic"
-time_series$ctryiso[time_series$Country == "Iran (Islamic Rep. of)"] <- "Iran (Islamic Republic of)"
-time_series$ctryiso[time_series$Country == "Lao People's Dem. Rep."] <- "Lao People's Democratic Republic"
-time_series$ctryiso[time_series$Country == "Rep. of Korea"] <- "Republic of Korea"
+time_series$ctryiso[time_series$Country == "C\xf4te d'Ivoire"] <- "Côte d'Ivoire"
+time_series$ctryiso[time_series$Country == "Cura\xe7ao"] <- "Curaçao"
+time_series$ctryiso[time_series$Country == "Palestinian"] <- "State of Palestine"
 
-time_series$ctryiso[time_series$Country == "Dem. People's Rep. of Korea"] <- "Democratic People's Republic of Korea"
-time_series$ctryiso[time_series$Country == "Rep. of Moldova"] <- "Republic of Moldova"
-time_series$ctryiso[time_series$Country == "Serbia and Kosovo (S/RES/1244 (1999))"] <- "Serbia"
-time_series$ctryiso[time_series$Country == "Syrian Arab Rep."] <- "Syrian Arab Republic"
-time_series$ctryiso[time_series$Country == "United Rep. of Tanzania"] <- "United Republic of Tanzania"
-time_series$ctryiso[time_series$Country == "Holy See (the)"] <- "Holy See (Vatican City State)"
-time_series$ctryiso[time_series$Country == "R?union"] <- "Reunion"
-time_series$ctryiso[time_series$Country == "Saint-Pierre-et-Miquelon"] <- "Saint Pierre and Miquelon"
-time_series$ctryiso[time_series$Country == "US Virgin Islands"] <- "Virgin Islands, U.S."
-time_series$ctryiso[time_series$Country == "Wallis and Futuna Islands "] <- "Wallis and Futuna"
-time_series$ctryiso[time_series$Country == "United Kingdom"] <- "United Kingdom of Great Britain and Northern Ireland"
+code_d <- reference %>% 
+  select(namepostat, iso_3) %>% 
+  rename(country = namepostat,
+         iso_d = iso_3)
+time_series <- merge(x = time_series , by.x = "ctryiso", all.x = TRUE, y = code_d , by.y = "country" )
+#View(unique(time_series[ is.na(time_series$iso_d), c("ctryiso")]))
+
 
 ### Rewrite country name in UNHCR dataset for further matching - country of origin
 time_series$origin_iso <- as.character(time_series$Origin)
-time_series$origin_iso[time_series$Origin == "Bonaire"] <- "Bonaire, Sint Eustatius and Saba"
-time_series$origin_iso[time_series$Origin == "Central African Rep."] <- "Central African Republic"
-time_series$origin_iso[time_series$Origin == "China, Hong Kong SAR"] <- "China, Hong Kong Special Administrative Region"
-time_series$origin_iso[time_series$Origin == "China, Macao SAR"] <- "China, Macao Special Administrative Region"
-time_series$origin_iso[time_series$Origin == "C\xf4te d'Ivoire"] <- "C?te d'Ivoire"
-time_series$origin_iso[time_series$Origin == "Cura\xe7ao"] <- "Cura?ao"
-time_series$origin_iso[time_series$Origin == "Czech Rep."] <- "Czechia"
-time_series$origin_iso[time_series$Origin == "Dem. Rep. of the Congo"] <- "Democratic Republic of the Congo"
-time_series$origin_iso[time_series$Origin == "Dominican Rep."] <- "Dominican Republic"
-time_series$origin_iso[time_series$Origin == "Iran (Islamic Rep. of)"] <- "Iran (Islamic Republic of)"
-time_series$origin_iso[time_series$Origin == "Lao People's Dem. Rep."] <- "Lao People's Democratic Republic"
-time_series$origin_iso[time_series$Origin == "Rep. of Korea"] <- "Republic of Korea"
-
-time_series$origin_iso[time_series$Origin == "Dem. People's Rep. of Korea"] <- "Democratic People's Republic of Korea"
-time_series$origin_iso[time_series$Origin == "Rep. of Moldova"] <- "Republic of Moldova"
-time_series$origin_iso[time_series$Origin == "Serbia and Kosovo (S/RES/1244 (1999))"] <- "Serbia"
-time_series$origin_iso[time_series$Origin == "Syrian Arab Rep."] <- "Syrian Arab Republic"
-time_series$origin_iso[time_series$Origin == "United Rep. of Tanzania"] <- "United Republic of Tanzania"
-time_series$origin_iso[time_series$Origin == "Holy See (the)"] <- "Holy See (Vatican City State)"
-time_series$origin_iso[time_series$Origin == "R?union"] <- "Reunion"
-time_series$origin_iso[time_series$Origin == "Saint-Pierre-et-Miquelon"] <- "Saint Pierre and Miquelon"
-time_series$origin_iso[time_series$Origin == "US Virgin Islands"] <- "Virgin Islands, U.S."
-time_series$origin_iso[time_series$Origin == "Wallis and Futuna Islands "] <- "Wallis and Futuna"
-time_series$origin_iso[time_series$Origin == "United Kingdom"] <- "United Kingdom of Great Britain and Northern Ireland"
+time_series$origin_iso[time_series$Origin == "C\xf4te d'Ivoire"] <- "Côte d'Ivoire"
+time_series$origin_iso[time_series$Origin == "Cura\xe7ao"] <- "Curaçao"
+time_series$origin_iso[time_series$Origin == "Palestinian"] <- "State of Palestine"
 
 
-#country code
-## Get region name
-url <- paste( 'https://pkgstore.datahub.io/core/country-codes/country-codes_csv/data/3b9fd39bdadd7edd7f7dcee708f47e1b/country-codes_csv.csv')
-destfile = "countrycode.csv"
-if (!file.exists(destfile)) {
-  #setInternet2(TRUE)
-  download.file(url ,destfile,method = "auto") }
-
-countrycode <- read.csv("countrycode.csv")
-
-code_d <- countrycode %>% 
-          select(official_name_en,
-                 ISO3166.1.Alpha.3) %>% 
-          rename(country = official_name_en,
-                 iso_d = ISO3166.1.Alpha.3)
-
-code_o <- countrycode %>% 
-          select(official_name_en,ISO3166.1.Alpha.3) %>% 
-          rename(country = official_name_en,
-                 iso_o = ISO3166.1.Alpha.3)
-
-time_series <- merge(x = time_series , by.x = "ctryiso", all.x = TRUE, y = code_d , by.y = "country" )
+code_o <- reference %>% 
+  select(namepostat,iso_3) %>% 
+  rename(country = namepostat,
+         iso_o = iso_3)
 time_series <- merge(x = time_series , by.x = "origin_iso", all.x = TRUE, y = code_o , by.y = "country" )
+#View(unique(time_series[ is.na(time_series$iso_o), c("origin_iso")]))
 
 
 refugee <- time_series %>% 
@@ -504,6 +457,45 @@ If we look at coefficients, we notice that some variables has __positive values_
 We can also present the model through a more visual forrest plot
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
+
+random.tidy <- broom::tidy(model.popgroup1a,
+                                    conf.int = TRUE,
+                                    conf.level = 0.95,
+                                    exponentiate = TRUE
+                                  )
+#str(random.tidy)
+random.tidy$fullname <- random.tidy$term
+random.tidy <- stringdist_join(x = random.tidy, y = dico, by = "fullname", mode = "left", max_dist = 2)
+random.tidy$term <- random.tidy$label
+random.tidy <- random.tidy[ !(is.na(random.tidy$term)), ]
+
+
+
+### Chart showing the model
+#ggcoef(model.popgroup1a, 
+plot1 <- ggcoef(random.tidy,        
+       exponentiate = TRUE, color = "purple", shape = 18,  size = 3.5, exclude_intercept = TRUE, 
+  vline_color = "red", vline_linetype =  "solid", errorbar_color = "black", errorbar_height = .25,
+  conf.level = 0.95, conf.int = TRUE, 
+  mapping = aes(x = estimate, y = term)) +
+  xlab("Influence factor for each variable: Estimate of Odd Ratio") +
+  ylab("") +
+  labs(title = "Food Insecure",
+           subtitle =  "Best combination of variables to explain this classification",
+           caption = "The household possesing the characteristics on the left side are less likely to be in this group,\n while the one possesing the characteristics on the right side are more likely to in that group.\n The black lines (also called 'whiskers') around the point represent the confidence interval for each variable\n to be included in the model (the shorter the line, the more precise is the estimate)",
+           x = NULL, y = NULL) +
+    bbc_style() +
+      theme( plot.title = element_text(size = 13),
+             plot.subtitle = element_text(size = 11),
+             plot.caption = element_text(size = 7, hjust = 1),
+            axis.text = element_text(size = 9),
+            panel.grid.major.x = element_line(color = "#cbcbcb"), 
+            panel.grid.major.y = element_blank(),
+            strip.text.x = element_text(size = 11))
+
+ggpubr::ggarrange(left_align(plot1, c("subtitle", "title", "caption")), ncol = 1, nrow = 1)
+
+
 ggcoef(random, exponentiate = TRUE, color = "purple", size = 5, shape = 18)
 
 ```
@@ -665,46 +657,47 @@ Country shows the predicting results of the model in 2018 and 2019, from any cou
 
 p2018 <- testp.error %>% 
   select(year,origin,iso_o,asylum,iso_d,esti1,real,error1) %>% 
-  rename(Year=year, 
-         Origin=origin,
-         Asylum=asylum,
-         Estimation=esti1,
-         Refugee=real,
-         Error=error1)
+  rename(Year = year, 
+         Origin = origin,
+         Asylum = asylum,
+         Estimation = esti1,
+         Refugee = real,
+         Error = error1)
 
 p2019 <- prediction_2019 %>% 
   select(year,origin,iso_o,asylum,iso_d,pred) %>% 
-  rename(Year=year, 
-         Origin=origin,
-         Asylum=asylum,
-         Estimation=pred)
+  rename(Year = year, 
+         Origin = origin,
+         Asylum = asylum,
+         Estimation = pred)
 
 p2019$Refugee <- NA
 p2019$Error <- NA
 
 result <- rbind(p2018,p2019)
 
-bureau <- readxl::read_xls("World_bureaus.xls",sheet = "World_Bureaus")
+### Compile results per bureau
 
-bureau_o <- bureau %>% 
-  select(iso3,main_office) %>% 
-  rename(iso_o=iso3,
-         bureau_o=main_office)
+bureau_o <- reference %>% 
+  select(iso_3, 
+         main_office) %>% 
+  rename(iso_o = iso_3,
+         bureau_o = main_office)
 
-bureau_d <- bureau %>% 
-  select(iso3,main_office) %>% 
-  rename(iso_d=iso3,
-         bureau_d=main_office)
+bureau_d <- reference %>% 
+  select(iso_3,main_office) %>% 
+  rename(iso_d = iso_3,
+         bureau_d = main_office)
 
-region_bureau_o <- left_join(result,bureau_o,by="iso_o")
+region_bureau_o <- left_join(result, bureau_o, by = "iso_o")
 
-region_bureau <- left_join(region_bureau_o,bureau_d,by="iso_d")
+region_bureau <- left_join(region_bureau_o, bureau_d, by = "iso_d")
 
 region <- region_bureau %>% 
   group_by(Year,bureau_o,bureau_d) %>% 
   summarise( Estimation = sum(Estimation),
-             Refugee=sum(Refugee)) %>%
-  mutate(Error= (Estimation - Refugee) / Refugee) %>% 
+             Refugee = sum(Refugee)) %>%
+  mutate(Error = (Estimation - Refugee) / Refugee) %>% 
   arrange(Year)
 
 links1 <- readxl::read_excel("sankey_region.xlsx", sheet = "links")
@@ -725,14 +718,14 @@ my_color <- 'd3.scaleOrdinal() .domain(["a", "b","c","d","e","f","g","my_unique_
 
 
 ```{r }
-DT::datatable({result }, options = list(pageLength = 20)  )
+DT::datatable({result }, options = list(pageLength = 10)  )
 
 ```
 
 Region sums up the results of the model in 2018 and 2019 at regional level.
 
 ```{r }
-DT::datatable({region },  options = list(pageLength = 20) )
+DT::datatable({region },  options = list(pageLength = 10) )
 
 ```
 Region Viz displays the regional results in 2019 with a sankey chart, which shows the refugee movements are mainly within the regions, except for the flow from MENA to Europe.

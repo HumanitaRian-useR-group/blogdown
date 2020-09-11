@@ -1,0 +1,310 @@
+---
+title: "Working with Survey Samples in the Tidyverse"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, error = FALSE)
+```
+
+# Introduction
+
+Despite the growing interest in Big Data and alternative data sources, household surveys remain the gold-standard for the production of official statistics. It should then come as no surprise that [a diverse selection of packages](https://cran.r-project.org/web/views/OfficialStatistics.html) have been developed to facilitate working with survey data in R. Two of the most popular packages in this regard are [sampling](https://cran.r-project.org/package=sampling) and [survey](https://cran.r-project.org/package=survey) for drawing survey samples and point/variance estimation, respectively, under complex sample designs. Yet, while both packages are part of the standard survey analyst's toolbox, they are not the most user-friendly packages to work with (especially survey) but that is by no fault of their own. Both packages offer a bewildering array of options meant to support even the most arcane of survey techniques and it's not easy to encapsulate the underlying complexity of all those methods behind a simple interface. Another issue with those packages is that they don't fit neatly into tidy workflows though recent work on [srvyr](https://cran.r-project.org/package=srvyr) is trying to remedy that.
+
+Our aim in this brief tutorial is to illustrate how the most common sample designs and estimation procedures can be carried out with little more than basic dplyr verbs. The sampling approach presented here was inspired by [this post](https://jennybc.github.io/purrr-tutorial/ls12_different-sized-samples.html) by Jennifer Bryan.
+
+Let's first start by constructing a synthetic census dataset to serve as our sampling frame.
+
+```{r data}
+library(tidyverse)
+library(fabricatr)
+
+set.seed(1)
+
+refpop <- 
+  fabricate(
+    ea = add_level(333),
+    hh = 
+      add_level(
+        N = round(rnorm(length(ea), 100, 25)),
+        safety = c("Not safe", "Safe")[1+draw_binary_icc(clusters = ea, prob = .4, ICC = .1)],
+        pcexp = draw_normal_icc(clusters = ea, mean = 5000, sd = 1000, ICC = .1)))
+
+hcpop <- 
+  fabricate(
+    ea = add_level(667),
+    hh = 
+      add_level(
+        N = round(rnorm(length(ea), 100, 25)),
+        safety = c("Not safe", "Safe")[1+draw_binary_icc(prob = .7, clusters = ea, ICC = .1)],
+        pcexp = draw_normal_icc(clusters = ea, mean = 10000, sd = 1500, ICC = .1)))
+
+universe <- 
+  bind_rows("Refugees" = refpop, "Host community" = hcpop, .id = "strata") %>% 
+  as_tibble()
+```
+
+That's a population of about 100,000 households that is one-third refugees and two-thirds host community members (think of a small refugee camp and its neighboring villages). The population has been divided into enumeration areas with an average of 100 households each and we have two indicators on our synthetic population: `safety`, a binary indicator of whether the household feels safe or not in their neighborhood, and `pcexp` for an estimate of household per-capita expenditure. Both measures exhibit some degree of clustering as would be expected.
+
+Here's what the data looks like:
+
+```{r datapreview}
+universe %>% head(10)
+```
+
+# Quick Aside: Nested Tables
+
+What makes dplyr especially useful for working with survey samples is its support for nested tables. Table nesting comes in handy whenever you're working with hierarchical data and want to run operations on entities at different levels of the hierarchy. The trick that allows this is that tables in R are just lists of equal-length items that store column values, but since lists can store any data type, including other lists, we can store entire tables in table cells.
+
+The following is a perfectly valid data.frame in R:
+
+```{r nesting}
+(ex <- 
+   tribble(
+     ~parent, ~children,
+     "10s",  tibble(x = 10:19),
+     "20s",  tibble(x = 20:29),
+     "30s",  tibble(x = 30:39)))
+```
+
+And dplyr's nest()/unnest() functions do all the hard-work of packing/unpacking data to allow us to move up and down the grouping hierarchy.
+
+Unnesting moves us down:
+
+```{r nesting-unnest}
+(tmp <- ex %>% unnest(children))
+```
+
+While nesting takes us up:
+
+```{r nesting-nest}
+tmp %>% group_nest(parent)
+```
+
+It should be easy to see how this could help when working with nested populations.
+
+# Sampling
+
+We're now ready to dive into sampling.
+
+## Simple Random Sampling
+
+Simple random sampling is the cornerstone foundation of all sample designs. It's implemented in dplyr using `sample_n()`. Here's a draw of 1000 households:
+
+```{r srs}
+universe %>% sample_n(size = 1000)
+```
+
+## Stratified Sampling
+
+On to a slightly more sophisticated sample design. The beauty of dplyr is that it allows you to express in code the same exact steps you would follow when describing the method:
+
+```{r stratified}
+universe %>% 
+  # partition the population into strata
+  group_nest(strata) %>% 
+  # for each stratum...
+  rowwise() %>% 
+  mutate(
+    # calculate the required sample size
+    samplesz = round(1000*nrow(data)/nrow(universe)),
+    # then draw the sample
+    sample = list(sample_n(data, size = samplesz))) %>% 
+  select(-c(data, samplesz)) %>% 
+  # et voila!
+  unnest(sample)
+```
+
+That's it for stratified sampling! For disproportionate stratification, just make sure to adjust `samplesz` accordingly.
+
+## Cluster Sampling
+
+Clustering is fairly similar except this time we sample _from_ the grouped table rather than within it.
+
+```{r clustered}
+universe %>% 
+  # group the population by cluster
+  group_nest(ea) %>% 
+  # draw the desired number of clusters
+  sample_n(size = 10) %>% 
+  # and revert to a form that we can work with.
+  unnest(data)
+```
+
+We could have also passed any measure of size to `sample_n()`'s  `weight` argument for unequal probability sampling.
+
+## Multi-stage Sampling
+
+Armed with the basics, we can compose the pieces to construct arbitrarily complex designs as we wish.
+
+Here, for example, is the familiar two-stage design with probability proportional to size selection at first stage and equal sample allocation across strata:
+
+```{r multistage}
+mssample <- function(universe) {
+  samplesz <- 1000
+  strata_cnt <- length(unique(universe$strata))
+  hh_per_cluster <- 10
+  clusters_per_stratum <- samplesz/hh_per_cluster/strata_cnt
+  
+  msdata <- 
+    universe %>% 
+    group_nest(strata, ea) %>% 
+    rowwise() %>% 
+    mutate(psusz = nrow(data)) %>% 
+    group_nest(strata) %>% 
+    rowwise() %>% 
+    mutate(stratasz = sum(data$psusz))
+
+  stage1 <- 
+    msdata %>% 
+    rowwise() %>% 
+    mutate(sample = list(tibble(slice_sample(data, n = clusters_per_stratum, weight_by = data[[1]]$psusz)))) %>% 
+    select(-data) %>% 
+    unnest(sample)
+    
+  stage2 <- 
+    stage1 %>% 
+    rowwise() %>% 
+    mutate(sample = list(sample_n(data, size = hh_per_cluster))) %>% 
+    select(-data) %>% 
+    unnest(sample)
+  
+  s <- 
+    stage2 %>% 
+    mutate(
+      p1 = psusz/stratasz, p2 = hh_per_cluster/psusz,
+      p = p1 * p2,
+      wt = 1/p, wt = wt/sum(wt) * length(wt)) %>% 
+    select(-stratasz, -psusz, -p1, -p2, -p)
+  
+  s
+}
+
+(s <- mssample(universe))
+```
+
+We've stored this design and its output so we can reuse them in the second half of this tutorial. Also note that we've added normalized weights to our sample in the last step so that we could draw valid inferences from our sample.
+
+# Estimation
+
+We'll now shift our attention to estimation.
+
+## Point Estimation
+
+Point estimation refers to the calculation of sums, averages, ratios, etc... from sample data.
+
+For estimates involving categorical variables, dplyr's `count()` already supports a `wt` argument for weighted calculations.
+
+```{r pointest_cat}
+s %>% count(strata, safety, wt = wt) %>% group_by(strata) %>% mutate(p = n/sum(n)*100)
+```
+
+Which is basically what we had specified when constructing our synthetic data: 70% of the host community feel safe in their neighborhoods whereas only 40% of the refugee population share the sentiment.
+
+Actually, since our sample is self-weighting within each strata, the results would have come back the same with or without weights. Let's look at the overall totals to see why weights are needed:
+
+```{r pointest_ex1}
+left_join(
+  s %>% count(safety, wt = wt, name = "n.weighted") %>% mutate(p.weighted = n.weighted/sum(n.weighted)*100),
+  s %>% count(safety, name = "n.unweighted") %>% mutate(p.unweighted = n.unweighted/sum(n.unweighted)*100))
+```
+
+Now compare that to the census:
+
+```{r pointest_ex2}
+universe %>% count(safety) %>% mutate(p = n/sum(n)*100)
+```
+
+And you could see that our weighted estimates are more in line with what we should have gotten.
+
+What about point estimates involved continuous variables? Unfortunately there's no convenience function similar to `count()` for those. That means we'll have to fall back on the usual group+summarize workflow:
+
+```{r pointest_cont}
+s %>% group_by(strata) %>% summarize(pcexp = weighted.mean(pcexp, wt))
+```
+
+Ground-truth:
+
+```{r pointest_ex3}
+universe %>% group_by(strata) %>% summarize(pcexp = mean(pcexp))
+```
+
+Close enough, with slight deviations because of sampling error... which brings us to the last part of this tutorial.
+
+## Variance Estimation
+
+When producing estimates from sample data, we're normally interested in more than just the point estimates. We also want to know how accurate our estimates are. This is the domain of variance estimation.
+
+Let's start by producing the _actual_ sampling distribution of our mean per-capita expenditure statistic. We can do that since we're working with simulated data. It wouldn't otherwise be possible in the real world.
+
+```{r samplingdist}
+samplingdist <- 
+  map_dfr(
+    1:500,
+    function(x) {
+      mssample(universe) %>% 
+        { 
+          bind_rows(
+            group_by(., strata) %>% summarize(pcexp = weighted.mean(pcexp, wt)),
+            group_by(., strata = "Everyone") %>% summarize(pcexp = weighted.mean(pcexp, wt)))
+        }
+    })
+```
+
+Which tells us that our point estimates and standard errors should be:
+
+```{r varest_truth}
+(est_universe <- samplingdist %>% group_by(strata) %>% summarize(est = mean(pcexp), se = sd(pcexp)))
+```
+
+We had gotten to those point estimates in the previous section. Our job now is to try to reproduce the standard error `se` from nothing but the sample data.
+
+Most software approaches variance estimation using analytical methods grounded in some smart mathematical approximations. We'll take a more (brute-force) computational approach based on the bootstrap here. The bootstrap, for those not familiar with it, is the idea of resampling with replacement from sample data to approximate the sampling distribution of the target statistic. See section 2 of [this article](https://arxiv.org/abs/1411.5279) for more details on the how and why of bootstrapping.
+
+We could implement the bootstrap ourselves using `rerun()` and `sample_n()` with `replace = TRUE` but instead we're going to pull in [tidymodels](https://www.tidymodels.org/) and use `rsample::bootstraps()`. It's more convenient, idiomatic, and you'll probably have tidymodels loaded in your workspace anyway if you're planning on running any models on your survey data.
+
+```{r bootstrap}
+library(tidymodels)
+
+b <- s %>% group_nest(strata, ea) %>% bootstraps(times = 500, strata = strata)
+
+b <- 
+  b %>% 
+  rowwise() %>% 
+  mutate(
+    stats = 
+      analysis(splits) %>% 
+      unnest(data) %>% 
+      { 
+        bind_rows(
+          group_by(., strata) %>% summarize(pcexp = weighted.mean(pcexp, wt)),
+          group_by(., strata = "Everyone") %>% summarize(pcexp = weighted.mean(pcexp, wt)))
+      } %>% 
+      list()
+  )
+
+(est_sample <- 
+  b %>% 
+  select(stats) %>% 
+  unnest(stats) %>% 
+  group_by(strata) %>% 
+  summarize(est = mean(pcexp), se = sd(pcexp)))
+```
+
+The key thing to keep in mind is that the bootstrap sample should resemble the original sample in the way it is drawn. Meaning, if we had drawn clusters from within strata in the original sample, then we should resample clusters within strata for the bootstrap.
+
+Let's see how our estimates stack up against the actual values we had calculated earlier.
+
+```{r varest_plot}
+bind_rows("sampling distribution" = est_universe, "bootstrap" = est_sample, .id = "src") %>% 
+  ggplot(aes(x = est, y = strata, xmin = est - 2*se, xmax = est + 2*se, color = src)) +
+  geom_point(position = position_dodge(-.5), size = 3) +
+  geom_errorbarh(position = position_dodge(-.5), height = .5) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL, color = NULL,
+       title = "Estimated per-capita expenditures",
+       subtitle = "Mean & 95% confidence interval")
+```
+
+Confirming that our estimates line up with what they should be.
