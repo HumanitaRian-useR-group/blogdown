@@ -1,16 +1,27 @@
 ---
 title: "Working with Survey Samples in the Tidyverse"
-output: html_document
+author: "Hisham Galal"
+date: "2020-05-29"
+categories:
+  - Sampling
+  - Survey
+tags:
+  - UNHCR
+  - Hisham-Galal
 ---
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, error = FALSE)
 ```
 
-# Introduction
 
-Despite the growing interest in Big Data and alternative data sources, household surveys remain the gold-standard for the production of official statistics. It should then come as no surprise that [a diverse selection of packages](https://cran.r-project.org/web/views/OfficialStatistics.html) have been developed to facilitate working with survey data in R. Two of the most popular packages in this regard are [sampling](https://cran.r-project.org/package=sampling) and [survey](https://cran.r-project.org/package=survey) for drawing survey samples and point/variance estimation, respectively, under complex sample designs. Yet, while both packages are part of the standard survey analyst's toolbox, they are not the most user-friendly packages to work with (especially survey) but that is by no fault of their own. Both packages offer a bewildering array of options meant to support even the most arcane of survey techniques and it's not easy to encapsulate the underlying complexity of all those methods behind a simple interface. Another issue with those packages is that they don't fit neatly into tidy workflows though recent work on [srvyr](https://cran.r-project.org/package=srvyr) is trying to remedy that.
+
+Despite the growing interest in Big Data and alternative data sources, household surveys remain the gold-standard for the production of official statistics. It should then come as no surprise that [a diverse selection of packages](https://cran.r-project.org/web/views/OfficialStatistics.html) have been developed to facilitate working with survey data in R. 
+<!--MORE-->
+# Introduction
+Two of the most popular packages in this regard are [sampling](https://cran.r-project.org/package=sampling) and [survey](https://cran.r-project.org/package=survey) for drawing survey samples and point/variance estimation, respectively, under complex sample designs. Yet, while both packages are part of the standard survey analyst's toolbox, they are not the most user-friendly packages to work with (especially survey) but that is by no fault of their own. Both packages offer a bewildering array of options meant to support even the most arcane of survey techniques and it's not easy to encapsulate the underlying complexity of all those methods behind a simple interface. Another issue with those packages is that they don't fit neatly into tidy workflows though recent work on [srvyr](https://cran.r-project.org/package=srvyr) is trying to remedy that.
 
 Our aim in this brief tutorial is to illustrate how the most common sample designs and estimation procedures can be carried out with little more than basic dplyr verbs. The sampling approach presented here was inspired by [this post](https://jennybc.github.io/purrr-tutorial/ls12_different-sized-samples.html) by Jennifer Bryan.
 

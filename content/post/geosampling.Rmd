@@ -18,9 +18,13 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, error = FAL
 knitr::opts_chunk$set(fig.align = "center")
 ```
 
-# Background
+
 
 Household surveys can deliver immense insight into the living conditions of affected populations. Their uptake by the humanitarian system, however, has been stalled by a multitude of logistical challenges, not least of which is the absence of up-to-date sampling frames. The issue is normally mitigated through the application of multi-stage cluster sampling in stable situations, but those require the presence of up-to-date population estimates at granular levels of administrative divisions. Information which is not always readily available in humanitarian settings where the mass scale of displacement and destruction can quickly render official maps and population figures out of touch with reality.
+
+<!--MORE-->
+
+# Background
 
 The challenge with missing population data is not unique to humanitarian settings alone prompting research interest into the use of alternative data sources to fill in the gap for missing census records. With the growing availability of high-resolution satellite imagery coupled with recent advances in machine learning methods, organizations like [WorldPop](https://www.worldpop.org/), [Facebook](https://dataforgood.fb.com/tools/population-density-maps/), and the [EU's JRC](https://ghsl.jrc.ec.europa.eu/ghs_pop2019.php), to name a few, have been able to produce extremely detailed population estimates for all countries across the globe. Those estimates are provided in the form of a fine grid overlaid on top of the target geographic area where the grid cells contain estimates of the population in each cell hence the name "gridded population data".
 

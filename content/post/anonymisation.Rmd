@@ -4,22 +4,16 @@ author: "Edouard Legoupil"
 date: "2020-04-02"
 categories:
   - Anonymisation
+  - Survey
 tags:
   - UNHCR
   - Edouard-Legoupil
 ---
 
-The dissemination of microdata (i.e. survey data) is important as it helps: 
-
- * Reducing duplication in data collection; 
+The dissemination of microdata (i.e. survey data) allows to reduce duplication in data collection; to improve the reliability and relevance of data; to support research to promoting development of new tools for using data. Last but not least, it enhance the credibility of the organisation that collected the data. 
  
- * Improving the reliability and relevance of data; 
- 
- * Supporting research and promoting development of new tools for using data; 
-  
- * Enhancing the credibility of the organisation that collected the data. 
- 
-In the context of the [grand bargain commitment of joint needs assessment](https://humanitarian-user-group.github.io/post/first-meeting/), being able to share such survey data, and therefore to anonymise it beforehand, is a key requirement for collective data interpretation. 
+In the context of the [grand bargain commitment of joint needs assessment](https://humanitarian-user-group.github.io/post/first-meeting/), being able to share such survey data, and therefore to __anonymise__ it beforehand, is a key requirement for collective data interpretation. 
+<!--MORE-->
  
 
 Anonymisation is often erroneously perceived as the operation of __simply removing  direct identifiers__ (such as _name,  telephone, GPS locations_) while in reality there are ways to re-identify persons through other means. On the hand, there's also a potential perception that anonymisation can be fully automatized through the application of data treatment based on predefined threshold. 
